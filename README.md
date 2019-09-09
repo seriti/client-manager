@@ -35,7 +35,9 @@ within the existing  "$app->group('/admin', function () {}" code block contained
 5.) Open the setup_app.php file and  add the module config code snippet into bottom of skeleton "[directory-for-app]/src/setup_app.php" file.
 Please check the "table_prefix" value to ensure that there will not be a clash with any existing tables in your database.
 
-6.) Now in your browser goto URL:
+6.) Copy the contents of "templates" folder to "[directory-for-app]/templates/" folder
+
+7.) Now in your browser goto URL:
 Now goto URL:
 "http://localhost:8000/admin/client/dashboard" if you are using php built in server
 OR 
