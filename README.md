@@ -44,7 +44,7 @@ Please check the **table_prefix** value to ensure that there will not be a clash
 OR   
 **http://www.yourdomain.com/admin/client/dashboard** if you have configured a domain on your server  
 
-Now click link at bottom of page "Setup Database": This will create all necessary database tables with table_prefix as defined above.  
+Now click link at bottom of page **Setup Database**: This will create all necessary database tables with table_prefix as defined above.  
 Thats it, you are good to go. Add some clients, capture some timesheets, generate some invoices, view reports.  
 
 NB: To customise the invoice PDF you need to use existing seriti skeleton customise module.   
