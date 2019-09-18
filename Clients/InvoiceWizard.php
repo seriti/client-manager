@@ -20,7 +20,7 @@ class InvoiceWizard extends Wizard
     //configure
     public function setup($param = []) 
     {
-        $param = ['cache'=>'invoice_wizard','bread_crumbs'=>true,'strict_var'=>false];
+        $param = ['bread_crumbs'=>true,'strict_var'=>false];
         parent::setup($param);
 
         $this->addVariable(array('id'=>'client_id','type'=>'INTEGER','title'=>'Client ID','max'=>1000000000));
