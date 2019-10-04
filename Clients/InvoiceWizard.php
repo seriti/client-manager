@@ -21,6 +21,7 @@ class InvoiceWizard extends Wizard
     public function setup($param = []) 
     {
         $param = ['bread_crumbs'=>true,'strict_var'=>false];
+        $param['csrf_token'] = $this->getContainer('user')->getCsrfToken();
         parent::setup($param);
 
         $this->addVariable(array('id'=>'client_id','type'=>'INTEGER','title'=>'Client ID','max'=>1000000000));
