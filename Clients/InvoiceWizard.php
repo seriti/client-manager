@@ -12,6 +12,7 @@ use Seriti\Tools\STORAGE;
 use Seriti\Tools\BASE_UPLOAD;
 use Seriti\Tools\UPLOAD_TEMP;
 use Seriti\Tools\UPLOAD_DOCS;
+use Seriti\Tools\UPLOAD_ROUTE;
 
 use App\Clients\Helpers;
 
@@ -382,7 +383,7 @@ class InvoiceWizard extends Wizard
         //for upload of any supporting documents
         if($no == 3) {
             $param = array();
-            $param['upload_url'] = '/admin/upload?mode=upload';
+            $param['upload_url'] = UPLOAD_ROUTE.'?mode=upload';
             $param['list_id'] = 'file-list';
             $param['reset_id'] = 'reset-upload';
             $param['start_id'] = 'start-upload';

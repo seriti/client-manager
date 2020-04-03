@@ -14,6 +14,7 @@ use Seriti\Tools\UPLOAD_DOCS;
 use Seriti\Tools\STORAGE;
 use Seriti\Tools\SITE_NAME;
 use Seriti\Tools\TABLE_USER;
+use Seriti\Tools\AJAX_ROUTE;
 
 use Psr\Container\ContainerInterface;
 
@@ -415,7 +416,7 @@ class Helpers {
         if($error_str=='') {
             $csv_id='TIME_SHEETS_'.$client_id;
             $excel_str='<img src="/images/excel_icon.gif" title="Export CSV/Excel file" alt="Export CSV/Excel file" border="0">Excel/CSV';
-            $csv_link='&nbsp;<a href="/admin/ajax?mode=csv&id='.urlencode($csv_id).'">'.$excel_str.'</a>';
+            $csv_link='&nbsp;<a href="'.AJAX_ROUTE.'?mode=csv&id='.urlencode($csv_id).'">'.$excel_str.'</a>';
             
             
             $html.='<div><h1>All time-sheets for '.$client['name'].' from '.Date::formatDate($from_date).' '.
@@ -479,7 +480,7 @@ class Helpers {
             
             $csv_id = 'STATEMENT_'.$client_id;
             $excel_str = '<img src="/images/excel_icon.gif" title="Export CSV/Excel file" alt="Export CSV/Excel file" border="0">Excel/CSV';
-            $csv_link = '&nbsp;<a href="/admin/ajax?mode=csv&id='.urlencode($csv_id).'">'.$excel_str.'</a>';
+            $csv_link = '&nbsp;<a href="'.AJAX_ROUTE.'?mode=csv&id='.urlencode($csv_id).'">'.$excel_str.'</a>';
             $csv_data = '';
             $csv_row = 'INVOICE_NO,Date,Amount';
             Csv::csvAddRow($csv_row,$csv_data);
@@ -573,7 +574,7 @@ class Helpers {
             
             $csv_id = 'STATEMENT_LEDGER_'.$client_id;
             $excel_str = '<img src="/images/excel_icon.gif" title="Export CSV/Excel file" alt="Export CSV/Excel file" border="0">Excel/CSV';
-            $csv_link = '&nbsp;<a href="/admin/ajax?mode=csv&id='.urlencode($csv_id).'">'.$excel_str.'</a>';
+            $csv_link = '&nbsp;<a href="'.AJAX_ROUTE.'?mode=csv&id='.urlencode($csv_id).'">'.$excel_str.'</a>';
             $csv_data = '';
             $balance = 0.00;
             $csv_row = 'Description,Date,Amount,Balance';

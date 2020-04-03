@@ -6,7 +6,7 @@ add the below code snippet to the end of existing "src/setup_app.php" file.
 This tells the framework about module: name, sub-memnu route list and title, database table prefix.
 */
 
-$container['config']->set('module','clients',['name'=>'Clients',
+$container['config']->set('module','clients',['name'=>'Client manager',
                                               'route_root'=>'admin/client/',
                                               'route_list'=>['dashboard'=>'Dashboard','client'=>'Clients','time'=>'Timesheets','task'=>'Tasks',
                                                              'invoice'=>'Invoices','payment'=>'Payments','report'=>'Reports'],
