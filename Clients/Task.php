@@ -28,7 +28,7 @@ class Task extends Table
 
         $this->setupFiles(array('location'=>'TSK','max_no'=>10,
                                 'table'=>TABLE_PREFIX.'files','list'=>true,'list_no'=>10,
-                                'link_page'=>'task_file','link_data'=>'SIMPLE','width'=>'700','height'=>'600'));
+                                'link_url'=>'task_file','link_data'=>'SIMPLE','width'=>'700','height'=>'600'));
 
         $this->addAction(array('type'=>'check_box','text'=>'')); 
         $this->addAction(array('type'=>'edit','text'=>'edit'));
