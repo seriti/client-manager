@@ -721,8 +721,11 @@ class Helpers {
                 }    
                 
                 foreach($files as $file_id => $file) {
-                    $param = ['file_name_change'=>$file['file_name_orig']];
-                    $url = $s3->getS3Url($file['file_name'],$s3_expire,$param);
+                    $param = [];
+                    $param['file_name_change'] = $file['file_name_orig'];
+                    $param['expire'] = $s3_expire;
+
+                    $url = $s3->getS3Url($file['file_name'],$param);
 
                     if($options['format'] === 'TEXT') {
                         $output .= $file['file_name_orig'].":\r\n".$url."\r\n"; 

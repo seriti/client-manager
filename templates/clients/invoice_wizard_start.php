@@ -30,7 +30,9 @@ $fixed_annual = $db->readSqlArray($sql);
 if($fixed_annual != 0) {
   $html .= '<br/><br/><p>Following clients have fixed annual renewals due:</p>';
   $html .= Html::arrayDumpHtml($fixed_annual); 
-} 
+} else {
+  $html.= '<br/><br/><p>No fixed annual renewals due for '.$date['month'].'</p>';
+}
   
 echo $html;          
 
