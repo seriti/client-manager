@@ -48,7 +48,7 @@ class InvoicePaymentWizard
     {
         $error = '';
         $sql = '';
-        $html ='';
+        $html = '';
         $html2 = '';
         $account_id = '';
         $account_id2 = '';
@@ -191,12 +191,12 @@ class InvoicePaymentWizard
                     
                 }   
             }  
-            
-            $html = $this->viewMessages().$html;
+                        
             $html .= '<p><a href="?mode=start">Match more invoice payments</a></p>';  
-            
-            return $html;
         } 
+
+        $html = $this->viewMessages().$html;
+        return $html;
     }
 
 }

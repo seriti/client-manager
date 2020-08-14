@@ -290,12 +290,13 @@ class PaymentWizard
                 }   
               }  
             }  
-              
-            $html = $this->viewMessages().$html;
-            $html .= '<p><a href="?mode=start">Match more Ledger transactions to clients</a></p>';  
             
-            return $html;
-        } 
+            $html .= '<p><a href="?mode=start">Match more Ledger transactions to clients</a></p>';  
+        }
+
+
+        $html = $this->viewMessages().$html;
+        return $html; 
     }
 
 }

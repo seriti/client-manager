@@ -543,7 +543,7 @@ class Helpers {
         $payment_total = 0.00;
         $balance = 0.00;
         //allows matching first col values in readSqlArray
-        $sql_options['first_col_key'] = false;
+        $first_col_key = false;
 
         $cache = $container['cache'];
         $cache->setCache('CSV');
@@ -567,7 +567,7 @@ class Helpers {
                            'date <= "'.$db->escapeSql($to_date).'" )';
                                  
             $sql .= ' ORDER BY date ';
-            $entries = $db->readSqlArray($sql,$sql_options); 
+            $entries = $db->readSqlArray($sql,$first_col_key); 
         }  
         
         if($error_str == '') {

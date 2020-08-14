@@ -20,6 +20,7 @@ class Client extends Table
         $this->addTableCol(array('id'=>'invoice_prefix','type'=>'STRING','title'=>'Invoice prefix','required'=>false));
         $this->addTableCol(array('id'=>'Invoice_no','type'=>'INTEGER','title'=>'Invoice count','required'=>false));
         $this->addTableCol(array('id'=>'date_statement_start','type'=>'DATE','title'=>'Statement start date','new'=>date('Y-m-d')));
+        $this->addTableCol(array('id'=>'keywords','type'=>'TEXT','title'=>'Key words','list'=>false,'required'=>false,'hint'=>'(Used to match payment transaction to client)'));
         $this->addTableCol(array('id'=>'status','type'=>'STRING','title'=>'Status','new'=>'ACTIVE'));
 
         $this->addAction(array('type'=>'edit','text'=>'edit'));
