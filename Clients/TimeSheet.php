@@ -125,7 +125,7 @@ class TimeSheet
 
         $param = array();
         $param['class'] = 'form-control edit_input';
-        $sql = 'SELECT client_id,name FROM '.TABLE_PREFIX.'client ORDER BY name';              
+        $sql = 'SELECT `client_id`,`name` FROM `'.TABLE_PREFIX.'client` ORDER BY `name`';              
         $html .= Form::sqlList($sql,$this->db,'client_id',$client_id,$param);
                          
         $html .= '    </td>
@@ -134,7 +134,7 @@ class TimeSheet
                       <td align="right">Activity :&nbsp;</td>
                       <td align="left">';
                        
-        $sql='SELECT type_id,name FROM '.TABLE_PREFIX.'time_type WHERE status <> "HIDE" ORDER BY name';
+        $sql='SELECT `type_id`,`name` FROM `'.TABLE_PREFIX.'time_type` WHERE `status` <> "HIDE" ORDER BY `name`';
         $html .= Form::sqlList($sql,$this->db,'type_id',$type_id,$param);
                        
         $html .= '    </td>

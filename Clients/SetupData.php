@@ -150,19 +150,19 @@ class SetupData extends SetupModuledata
                             ) ENGINE=MyISAM DEFAULT CHARSET=utf8');  
 
         //initialisation
-        $this->addInitialSql('INSERT INTO `TABLE_PREFIXclient` (name,email,status,invoice_no,invoice_prefix) '.
+        $this->addInitialSql('INSERT INTO `TABLE_PREFIXclient` (`name`,`email`,`status`,`invoice_no`,`invoice_prefix`) '.
                              'VALUES("My first client","first@client.com","OK",0,"INV")','created my first client');
-        $this->addInitialSql('INSERT INTO `TABLE_PREFIXtime_type` (name,time_penalty,status) '.
+        $this->addInitialSql('INSERT INTO `TABLE_PREFIXtime_type` (`name`,`time_penalty`,`status`) '.
                              'VALUES("Programming",0,"OK"),("Miscellaneous",0,"OK"),("Billable meeting",0,"OK"),("Non Billable meeting",0,"NOBILL"),
                                     ("Non Billable phone/internet call",0,"NOBILL"),("Billable meeting",0,"OK"),("Writing documentation",0,"OK"),
                                     ("Writing emails",0,"OK"),("Billable meeting",0,"OK"),("Billable phone/internet call",15,"OK")','Created timekeeping types');
 
         //updates use time stamp in ['YYYY-MM-DD HH:MM'] format, must be unique and sequential
         //$this->addUpdateSql('YYYY-MM-DD HH:MM','Update TABLE_PREFIX--- SET --- "X"');
-        $this->addUpdateSql('2019-01-16 00:00','INSERT INTO TABLE_PREFIXtask (name,description,status,date_create,client_id) VALUES("wtf","wtf desc","OK","2018-12-12",63)');
-        $this->addUpdateSql('2019-01-16 00:02','DELETE FROM TABLE_PREFIXtask WHERE name = "wtf"');
-        $this->addUpdateSql('2019-01-16 00:03','INSERT INTO TABLE_PREFIXtask (name,description,status,date_create,client_id) VALUES("wtf","wtf desc","OK","2018-12-12",63)');
-        $this->addUpdateSql('2019-01-16 00:04','DELETE FROM TABLE_PREFIXtask WHERE name = "wtf"','REMOVE "wtf" tasks');
+        $this->addUpdateSql('2019-01-16 00:00','INSERT INTO `TABLE_PREFIXtask` (`name`,`description`,`status`,`date_create`,`client_id`) VALUES("wtf","wtf desc","OK","2018-12-12",63)');
+        $this->addUpdateSql('2019-01-16 00:02','DELETE FROM `TABLE_PREFIXtask` WHERE `name` = "wtf"');
+        $this->addUpdateSql('2019-01-16 00:03','INSERT INTO `TABLE_PREFIXtask` (`name`,`description`,`status`,`date_create`,`client_id`) VALUES("wtf","wtf desc","OK","2018-12-12",63)');
+        $this->addUpdateSql('2019-01-16 00:04','DELETE FROM `TABLE_PREFIXtask` WHERE `name` = "wtf"','REMOVE "wtf" tasks');
         
     }
     

@@ -56,8 +56,8 @@ class InvoiceWizard extends Wizard
             $from = $this->form['from_date'];
             $to = $this->form['to_date'];
             
-            $sql = 'SELECT client_id,name,email,email_alt,status,invoice_no,invoice_prefix,contact_name '.
-                   'FROM '.TABLE_PREFIX.'client WHERE client_id = "'.$this->db->escapeSql($client_id).'"';
+            $sql = 'SELECT `client_id`,`name`,`email`,`email_alt`,`status`,`invoice_no`,`invoice_prefix`,`contact_name` '.
+                   'FROM `'.TABLE_PREFIX.'client` WHERE `client_id` = "'.$this->db->escapeSql($client_id).'"';
             $this->data['client'] = $this->db->readSqlRecord($sql);
             
             //invoice items setup
@@ -69,26 +69,26 @@ class InvoiceWizard extends Wizard
             $items[2][0] = 'Unit price';
             $items[3][0] = 'Total';
             
-            $sql_where='WHERE W.client_id = "'.$this->db->escapeSql($client_id).'" AND '.
-                       'W.time_start >= "'.$from.'" AND W.time_start <= "'.$to.'" ';
+            $sql_where='WHERE W.`client_id` = "'.$this->db->escapeSql($client_id).'" AND '.
+                       'W.`time_start` >= "'.$from.'" AND W.`time_start` <= "'.$to.'" ';
                        
             //all time sheets for period
-            $sql = 'SELECT W.time_id AS Time_ID,U.name AS Coder,T.name AS Activity,W.time_start AS Date,'.
-                          'W.time_minutes AS Minutes,W.comment AS Comment '.
-                   'FROM '.TABLE_PREFIX.'time AS W JOIN '.TABLE_PREFIX.'time_type AS T ON (W.type_id = T.type_id) '.
-                        'JOIN user_admin AS U ON(W.user_id = U.user_id) '. 
-                    $sql_where.'ORDER BY W.time_start ';
+            $sql = 'SELECT W.`time_id` AS `Time_ID`,U.`name` AS `Coder`,T.`name` AS `Activity`,W.`time_start` AS `Date`,'.
+                          'W.`time_minutes` AS `Minutes`,W.`comment` AS `Comment` '.
+                   'FROM `'.TABLE_PREFIX.'time` AS W JOIN `'.TABLE_PREFIX.'time_type` AS T ON (W.`type_id` = T.`type_id`) '.
+                        'JOIN `user_admin` AS U ON(W.`user_id` = U.`user_id`) '. 
+                    $sql_where.'ORDER BY W.`time_start` ';
             $this->data['sql_time']=$sql;
             
             //summary of programming time and hourly rates per coder
             //NB: hourly rate for each coder must be set or their time is ignored by JOIN
-            $sql = 'SELECT UA.name AS name,UE.value AS hour_rate , '.
-                   'ROUND(SUM(W.time_minutes)/60,2) AS hours, '.
-                   'ROUND(UE.value * SUM(W.time_minutes)/60,2) AS total_fee  '.
-                   'FROM '.TABLE_PREFIX.'time AS W JOIN user_admin AS UA ON(W.user_id = UA.user_id) '.
-                   'JOIN '.TABLE_PREFIX.'user_extend AS UE ON(W.user_id = UE.user_id AND UE.parameter = "HOURLY_RATE") '.
-                   'JOIN '.TABLE_PREFIX.'time_type AS T ON (W.type_id = T.type_id AND T.status = "OK") '.
-                   $sql_where.' GROUP BY W.user_id ';
+            $sql = 'SELECT UA.`name` AS `name`,UE.`value` AS `hour_rate` , '.
+                   'ROUND(SUM(W.`time_minutes`)/60,2) AS `hours`, '.
+                   'ROUND(UE.`value` * SUM(W.`time_minutes`)/60,2) AS `total_fee`  '.
+                   'FROM `'.TABLE_PREFIX.'time` AS W JOIN `user_admin` AS UA ON(W.`user_id` = UA.`user_id`) '.
+                   'JOIN `'.TABLE_PREFIX.'user_extend` AS UE ON(W.`user_id` = UE.`user_id` AND UE.`parameter` = "HOURLY_RATE") '.
+                   'JOIN `'.TABLE_PREFIX.'time_type` AS T ON (W.`type_id` = T.`type_id` AND T.`status` = "OK") '.
+                   $sql_where.' GROUP BY W.`user_id` ';
             $this->data['sql_time_sum']=$sql;     
             $result = $this->db->readSql($sql);
             if($result !== 0) {
@@ -106,9 +106,9 @@ class InvoiceWizard extends Wizard
             }  
             
             //get any fixed repeat items
-            $sql = 'SELECT fixed_id,name,quantity,price,repeat_period,repeat_date FROM '.TABLE_PREFIX.'invoice_fixed '.
-                   'WHERE client_id = "'.$this->db->escapeSql($client_id).'" '.
-                   'ORDER BY name ';
+            $sql = 'SELECT `fixed_id`,`name`,`quantity`,`price`,`repeat_period`,`repeat_date` FROM `'.TABLE_PREFIX.'invoice_fixed` '.
+                   'WHERE `client_id` = "'.$this->db->escapeSql($client_id).'" '.
+                   'ORDER BY `name` ';
             $repeat_arr = $this->db->readSqlArray($sql); 
             if($repeat_arr !== 0) {
               foreach($repeat_arr as $repeat) {
@@ -158,8 +158,8 @@ class InvoiceWizard extends Wizard
             if($this->form_input and !isset($_POST['show_period'])) $this->form['show_period']=false;
             
             //check invoice_no unique
-            $sql='SELECT * FROM '.TABLE_PREFIX.'invoice '.
-                 'WHERE invoice_no = "'.$this->db->escapeSql($this->form['invoice_no']).'" ';
+            $sql='SELECT * FROM `'.TABLE_PREFIX.'invoice` '.
+                 'WHERE `invoice_no` = "'.$this->db->escapeSql($this->form['invoice_no']).'" ';
             $invoice_dup=$this->db->readSqlRecord($sql);
             if($invoice_dup!=0) {
                 $this->addError('Invoice No['.$this->form['invoice_no'].'] has been used before!'); 
@@ -340,8 +340,8 @@ class InvoiceWizard extends Wizard
             if(!$this->errors_found) {
                 $location_id = 'INV'.$this->data['invoice_id'];
                 $file_html = '<ul>';
-                $sql = 'SELECT file_id,file_name_orig FROM '.TABLE_PREFIX.'files '.
-                       'WHERE location_id ="'.$location_id.'" ORDER BY file_id ';
+                $sql = 'SELECT `file_id`,`file_name_orig` FROM `'.TABLE_PREFIX.'files` '.
+                       'WHERE `location_id` ="'.$location_id.'" ORDER BY `file_id` ';
                 $invoice_files = $this->db->readSqlList($sql);
                 if($invoice_files != 0) {
                     foreach($invoice_files as $file_id => $file_name_orig) {
@@ -401,7 +401,3 @@ class InvoiceWizard extends Wizard
     }
 
 }
-
-?>
-
-

@@ -12,14 +12,15 @@ use App\Clients\Helpers;
 class Task extends Table 
 {
     //configure
-    public function setup() 
+    public function setup($param = []) 
     {
         $param = ['row_name'=>'Task','col_label'=>'name'];
         parent::setup($param);
 
         $this->addTableCol(array('id'=>'task_id','type'=>'INTEGER','title'=>'Task ID','key'=>true,'key_auto'=>true,'list'=>false));
         $this->addTableCol(array('id'=>'name','type'=>'STRING','title'=>'Task name'));
-        $this->addTableCol(array('id'=>'client_id','type'=>'INTEGER','title'=>'For client','join'=>'name FROM '.TABLE_PREFIX.'client WHERE client_id'));
+        $this->addTableCol(array('id'=>'client_id','type'=>'INTEGER','title'=>'For client',
+                                 'join'=>'`name` FROM `'.TABLE_PREFIX.'client` WHERE `client_id`'));
         $this->addTableCol(array('id'=>'description','type'=>'TEXT','title'=>'Description','required'=>false));
         $this->addTableCol(array('id'=>'date_create','type'=>'DATE','title'=>'Date','new'=>date('Y-m-d')));
         $this->addTableCol(array('id'=>'status','type'=>'STRING','title'=>'Status','new'=>'NEW'));
@@ -38,7 +39,7 @@ class Task extends Table
 
         $this->addSearch(array('client_id','name','date_create','description','status'),array('rows'=>2));
 
-        $this->addSelect('client_id','SELECT client_id,name FROM '.TABLE_PREFIX.'client ORDER BY name');
+        $this->addSelect('client_id','SELECT `client_id`,`name` FROM `'.TABLE_PREFIX.'client` ORDER BY `name`');
         $this->addSelect('status','(SELECT "NEW") UNION (SELECT "DONE") UNION (SELECT "CANCEL")');
 
         $this->addAction(array('type'=>'popup','text'=>'Diary','url'=>'task_diary','mode'=>'view','width'=>600,'height'=>600)); 
@@ -137,8 +138,8 @@ class Task extends Table
                         $audit_str .= 'Task ID['.$task_id.'] ';
                                             
                         if($action === 'STATUS_CHANGE') {
-                            $sql = 'UPDATE '.$this->table.' SET status = "'.$this->db->escapeSql($status_change).'" '.
-                                   'WHERE task_id = "'.$this->db->escapeSql($task_id).'" ';
+                            $sql = 'UPDATE `'.$this->table.'` SET `status` = "'.$this->db->escapeSql($status_change).'" '.
+                                   'WHERE `task_id` = "'.$this->db->escapeSql($task_id).'" ';
                             $this->db->executeSql($sql,$error_tmp);
                             if($error_tmp == '') {
                                 $message_str = 'Status set['.$status_change.'] for Task ID['.$task_id.'] ';
@@ -152,8 +153,8 @@ class Task extends Table
                         }
                         
                         if($action == 'EMAIL_TASK') {
-                            $sql = 'SELECT task_id,client_id,name,description,date_create,status FROM '.$this->table.' '.
-                                   'WHERE task_id = "'.$this->db->escapeSql($task_id).'" ';
+                            $sql = 'SELECT `task_id`,`client_id`,`name`,`description`,`date_create`,`status` FROM `'.$this->table.'` '.
+                                   'WHERE `task_id` = "'.$this->db->escapeSql($task_id).'" ';
                             $task = $this->db->readSqlRecord($sql);
                                                         
                             Helpers::sendTaskReport($this->db,$this->container,$task['task_id'],$email_address,$error_tmp);

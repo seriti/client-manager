@@ -35,7 +35,7 @@ class Report extends ReportTool
             $param = [];
             $param['xtra'] = array('ALL'=>'ALL Clients');
             $param['class'] = 'form-control input-medium';
-            $sql = 'SELECT client_id,name FROM '.TABLE_PREFIX.'client ORDER BY name';
+            $sql = 'SELECT `client_id`,`name` FROM `'.TABLE_PREFIX.'client` ORDER BY `name`';
             if(isset($form['client_id'])) $client_id = $form['client_id']; else $client_id = 'ALL';
             $html .= Form::sqlList($sql,$this->db,'client_id',$client_id,$param);
         }
@@ -43,7 +43,7 @@ class Report extends ReportTool
         if($id === 'select_task') {
             $param = [];
             $param['class'] = 'form-control input-medium';
-            $sql = 'SELECT task_id,name FROM '.TABLE_PREFIX.'task ORDER BY name';
+            $sql = 'SELECT `task_id`,`name` FROM `'.TABLE_PREFIX.'task` ORDER BY `name`';
             if(isset($form['task_id'])) $task_id = $form['task_id']; else $task_id = '';
             $html .= Form::sqlList($sql,$this->db,'task_id',$task_id,$param);
         }

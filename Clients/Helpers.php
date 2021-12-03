@@ -38,7 +38,7 @@ class Helpers {
         $pdf_name = $invoice_no.'.pdf';
         $doc_name = $pdf_name;
             
-        $sql = 'SELECT * FROM '.TABLE_PREFIX.'client WHERE client_id = "'.$db->escapeSql($client_id).'"';
+        $sql = 'SELECT * FROM `'.TABLE_PREFIX.'client` WHERE `client_id` = "'.$db->escapeSql($client_id).'"';
         $client = $db->readSqlRecord($sql,$db); 
         
         //get setup options
@@ -240,8 +240,8 @@ class Helpers {
         }   
         
         if($error_str == '') {      
-            $sql = 'UPDATE '.TABLE_PREFIX.'client SET invoice_no = invoice_no + 1 '.
-                   'WHERE client_id = "'.$db->escapeSql($client_id).'" ';              
+            $sql = 'UPDATE `'.TABLE_PREFIX.'client` SET `invoice_no` = `invoice_no` + 1 '.
+                   'WHERE `client_id` = "'.$db->escapeSql($client_id).'" ';              
             $db->executeSql($sql,$error_tmp); 
             if($error_tmp !== '') $error_str .= 'Error updating client invoice no counter!';     
         }
@@ -261,11 +261,11 @@ class Helpers {
         //$pdf_dir=$seriti_config['path']['base'].$seriti_config['path']['files'];
         
         //get invoice details and invoice doc name
-        $sql = 'SELECT * FROM '.TABLE_PREFIX.'invoice WHERE invoice_id = "'.$db->escapeSql($invoice_id).'"';
+        $sql = 'SELECT * FROM `'.TABLE_PREFIX.'invoice` WHERE `invoice_id` = "'.$db->escapeSql($invoice_id).'"';
         $invoice = $db->readSqlRecord($sql); 
                     
         //NEED TO ASSOCIATE DOC WITH CLIENT AT SOME POINT, HERE OR IN CREATE INVOICE 
-        $sql = 'SELECT * FROM '.TABLE_PREFIX.'client WHERE client_id = "'.$db->escapeSql($client_id).'"';
+        $sql = 'SELECT * FROM `'.TABLE_PREFIX.'client` WHERE `client_id` = "'.$db->escapeSql($client_id).'"';
         $client = $db->readSqlRecord($sql); 
         
         //get all files related to invoice
@@ -276,8 +276,8 @@ class Helpers {
         $docs = new Upload($db,$container,TABLE_PREFIX.'files');
         $docs->setup(['location'=>'INV','interface'=>'download']);
 
-        $sql = 'SELECT file_id,file_name_orig FROM '.TABLE_PREFIX.'files '.
-               'WHERE location_id ="INV'.$invoice_id.'" ORDER BY file_id ';
+        $sql = 'SELECT `file_id`,`file_name_orig` FROM `'.TABLE_PREFIX.'files` '.
+               'WHERE `location_id` ="INV'.$invoice_id.'" ORDER BY `file_id` ';
         $invoice_files = $db->readSqlList($sql);
         if($invoice_files != 0) {
             foreach($invoice_files as $file_id => $file_name) {
@@ -315,45 +315,45 @@ class Helpers {
 
     //add payments from GL transactions provided that they dont exist already
     public static function addGlPayment($db,$client_id,$transact_id,&$message_str,&$error_str) {
-        $error_str='';
-        $message_str='';
-        $payment_exists=false;
+        $error_str = '';
+        $message_str = '';
+        $payment_exists = false;
         
-        $sql='SELECT transact_id,type_id,debit_credit,amount,date,description '.
-                 'FROM '.TABLE_PREFIX_GL.'transact WHERE transact_id = "'.$db->escapeSql($transact_id).'" ';
-        $transact=$db->readSqlRecord($sql);      
-        if($transact==0) {
-            $error_str.='Could not locate Ledger transaction ID['.$transact_id.']';         
+        $sql = 'SELECT `transact_id`,`type_id`,`debit_credit`,`amount`,`date`,`description` '.
+               'FROM `'.TABLE_PREFIX_GL.'transact` WHERE `transact_id` = "'.$db->escapeSql($transact_id).'" ';
+        $transact = $db->readSqlRecord($sql);      
+        if($transact == 0) {
+            $error_str .= 'Could not locate Ledger transaction ID['.$transact_id.']';         
         } else {
-            if($transact['type_id']!=='CASH') $error_str.='Ledger transaction is not of type CASH!';
-            if($transact['debit_credit']!=='C') $error_str.='Ledger transaction cannot be a Debit!';
+            if($transact['type_id'] !== 'CASH') $error_str .= 'Ledger transaction is not of type CASH!';
+            if($transact['debit_credit'] !== 'C') $error_str .= 'Ledger transaction cannot be a Debit!';
         }
         
         //check if payment not captured before
-        if($error_str==='') {
-            $sql='SELECT P.amount,P.date,P.description,P.client_id,C.name AS client '.
-                     'FROM '.TABLE_PREFIX.'payment AS P LEFT JOIN '.TABLE_PREFIX.'client AS C ON(P.client_id = C.client_id) '.
-                     'WHERE P.transact_id = "'.$db->escapeSql($transact_id).'" '; 
-            $payment=$db->readSqlRecord($sql); 
-            if($payment!=0) {
-                $message_str.='Payment['.$payment['amount'].' on '.Date::formatDate($payment['date']).'] already EXISTS '.
+        if($error_str === '') {
+            $sql = 'SELECT P.`amount`,P.`date`,P.`description`,P.`client_id`,C.`name` AS `client` '.
+                   'FROM `'.TABLE_PREFIX.'payment` AS P LEFT JOIN `'.TABLE_PREFIX.'client` AS C ON(P.`client_id` = C.`client_id`) '.
+                   'WHERE P.`transact_id` = "'.$db->escapeSql($transact_id).'" '; 
+            $payment = $db->readSqlRecord($sql); 
+            if($payment != 0) {
+                $message_str .= 'Payment['.$payment['amount'].' on '.Date::formatDate($payment['date']).'] already EXISTS '.
                                             'for client['.$payment['client'].'] and Transaction ID['.$transact_id.'] '; 
-                $payment_exists=true;
+                $payment_exists = true;
             }  
         }  
         
-        if($error_str==='' and $payment_exists===false) {
-            $data=array();
-            $data['client_id']=$client_id; 
-            $data['transact_id']=$transact_id; 
-            $data['date']=$transact['date'];
-            $data['amount']=$transact['amount']; 
-            $data['description']=$transact['description']; 
+        if($error_str === '' and $payment_exists === false) {
+            $data = array();
+            $data['client_id'] = $client_id; 
+            $data['transact_id'] = $transact_id; 
+            $data['date'] = $transact['date'];
+            $data['amount'] = $transact['amount']; 
+            $data['description'] = $transact['description']; 
             
             $db->insertRecord(TABLE_PREFIX.'payment',$data,$error_str);
-            if($error_str=='') {
-                $message_str.='Payment['.$transact['amount'].' on '.Date::formatDate($transact['date']).'] succesfully INSERTED '.
-                                            'for client ID['.$client_id.'].';
+            if($error_str == '') {
+                $message_str .= 'Payment['.$transact['amount'].' on '.Date::formatDate($transact['date']).'] succesfully INSERTED '.
+                                'for client ID['.$client_id.'].';
             }                
         }    
         
@@ -362,83 +362,83 @@ class Helpers {
     
     //time sheets report
     public static function timeSheets($db,$container,$client_id,$from_date,$to_date,&$error_str) {
-        $error_str='';
-        $html='';
-        $invoice_total=0.00;
-        $payment_total=0.00;
-        $balance=0.00;
+        $error_str = '';
+        $html = '';
+        $invoice_total = 0.00;
+        $payment_total = 0.00;
+        $balance = 0.00;
 
         $cache = $container['cache'];
         $cache->setCache('CSV');
         
-        if($client_id==='ALL') {
-            $sql_client='';
+        if($client_id === 'ALL') {
+            $sql_client = '';
             
-            $client=array();
-            $client['name']='ALL Clients';
+            $client = array();
+            $client['name'] = 'ALL Clients';
         } else {  
-            $sql_client='W.client_id = "'.$db->escapeSql($client_id).'" AND ';
+            $sql_client = 'W.`client_id` = "'.$db->escapeSql($client_id).'" AND ';
             
-            $sql='SELECT * FROM '.TABLE_PREFIX.'client WHERE client_id = "'.$db->escapeSql($client_id).'" ';
-            $client=$db->readSqlRecord($sql); 
-            if($client==0) $error_str.='Invalid client ID['.$client_id.'] ';
+            $sql = 'SELECT * FROM `'.TABLE_PREFIX.'client` WHERE `client_id` = "'.$db->escapeSql($client_id).'" ';
+            $client = $db->readSqlRecord($sql); 
+            if($client == 0) $error_str .= 'Invalid client ID['.$client_id.'] ';
         }  
         
-        if($error_str=='') {
-            $sql_where='WHERE '.$sql_client.' '.
-                                 'W.time_start >= "'.$db->escapeSql($from_date).'" AND '.
-                                 'W.time_start <= "'.$db->escapeSql($to_date).'" ';
+        if($error_str == '') {
+            $sql_where = 'WHERE '.$sql_client.' '.
+                         'W.`time_start` >= "'.$db->escapeSql($from_date).'" AND '.
+                         'W.`time_start` <= "'.$db->escapeSql($to_date).'" ';
 
-            $sql='SELECT W.time_id AS Time_ID,U.name AS Coder,C.name AS Client,T.name AS Activity,W.time_start AS Date,'.
-                                    'W.time_minutes AS Minutes,W.comment AS Comment '.
-                     'FROM '.TABLE_PREFIX.'time AS W JOIN '.TABLE_PREFIX.'time_type AS T ON (W.type_id = T.type_id) '.
-                                'JOIN '.TABLE_USER.' AS U ON(W.user_id = U.user_id) '. 
-                                'LEFT JOIN '.TABLE_PREFIX.'client AS C ON(W.client_id = C.client_id) '.
-                        $sql_where.'ORDER BY W.time_start ';
-            $result['time']=$db->readSql($sql);
+            $sql = 'SELECT W.`time_id` AS `Time_ID`,U.`name` AS `Coder`,C.`name` AS `Client`,T.`name` AS `Activity`,W.`time_start` AS `Date`,'.
+                          'W.`time_minutes` AS `Minutes`,W.`comment` AS `Comment` '.
+                   'FROM `'.TABLE_PREFIX.'time` AS W JOIN `'.TABLE_PREFIX.'time_type` AS T ON(W.`type_id` = T.`type_id`) '.
+                         'JOIN `'.TABLE_USER.'` AS U ON(W.`user_id` = U.`user_id`) '. 
+                         'LEFT JOIN `'.TABLE_PREFIX.'client` AS C ON(W.`client_id` = C.`client_id`) '.
+                         $sql_where.'ORDER BY W.`time_start` ';
+            $result['time'] = $db->readSql($sql);
             
-            $sql='SELECT UA.name AS name,UE.value AS hour_rate , '.
-                     'ROUND(SUM(W.time_minutes)/60,2) AS hours, '.
-                     'ROUND(UE.value * SUM(W.time_minutes)/60,2) AS total_fee  '.
-                     'FROM '.TABLE_PREFIX.'time AS W JOIN '.TABLE_USER.' AS UA ON(W.user_id = UA.user_id) '.
-                     'JOIN '.TABLE_PREFIX.'user_extend AS UE ON(W.user_id = UE.user_id AND UE.parameter = "HOURLY_RATE") '.
-                     'JOIN '.TABLE_PREFIX.'time_type AS T ON (W.type_id = T.type_id AND T.status = "OK") '.
-                     $sql_where.'GROUP BY name, hour_rate';
-            $result['time_sum']=$db->readSql($sql);
+            $sql = 'SELECT UA.`name` AS `name`,UE.`value` AS `hour_rate` , '.
+                     'ROUND(SUM(W.`time_minutes`)/60,2) AS `hours`, '.
+                     'ROUND(UE.`value` * SUM(W.`time_minutes`)/60,2) AS `total_fee`  '.
+                     'FROM `'.TABLE_PREFIX.'time` AS W JOIN `'.TABLE_USER.'` AS UA ON(W.`user_id` = UA.`user_id`) '.
+                     'JOIN `'.TABLE_PREFIX.'user_extend` AS UE ON(W.`user_id` = UE.`user_id` AND UE.`parameter` = "HOURLY_RATE") '.
+                     'JOIN `'.TABLE_PREFIX.'time_type` AS T ON (W.`type_id` = T.`type_id` AND T.`status` = "OK") '.
+                     $sql_where.'GROUP BY `name`, `hour_rate`';
+            $result['time_sum'] = $db->readSql($sql);
             
-            if($result['time']===0) {
-                $error_str.='NO time sheets found for client['.$client['name'].']';
+            if($result['time'] === 0) {
+                $error_str .= 'NO time sheets found for client['.$client['name'].']';
             }
             
             
         }  
         
-        if($error_str=='') {
-            $csv_id='TIME_SHEETS_'.$client_id;
-            $excel_str='<img src="/images/excel_icon.gif" title="Export CSV/Excel file" alt="Export CSV/Excel file" border="0">Excel/CSV';
-            $csv_link='&nbsp;<a href="'.AJAX_ROUTE.'?mode=csv&id='.urlencode($csv_id).'">'.$excel_str.'</a>';
+        if($error_str == '') {
+            $csv_id = 'TIME_SHEETS_'.$client_id;
+            $excel_str = '<img src="/images/excel_icon.gif" title="Export CSV/Excel file" alt="Export CSV/Excel file" border="0">Excel/CSV';
+            $csv_link = '&nbsp;<a href="'.AJAX_ROUTE.'?mode=csv&id='.urlencode($csv_id).'">'.$excel_str.'</a>';
             
             
-            $html.='<div><h1>All time-sheets for '.$client['name'].' from '.Date::formatDate($from_date).' '.
+            $html .= '<div><h1>All time-sheets for '.$client['name'].' from '.Date::formatDate($from_date).' '.
                          'to '.Date::formatDate($to_date).'</h1>';
             
-            $html.='<div>'.Html::mysqlDumpHtml($result['time_sum']).'</div>';
+            $html .= '<div>'.Html::mysqlDumpHtml($result['time_sum']).'</div>';
             
-            $row_h=0;
-            $col_w=array();
-            $col_type=array('','','','DATE','','');
-            $options['csv_output']='YES';
-            $output=array();
-            $align='L';
+            $row_h = 0;
+            $col_w = array();
+            $col_type = array('','','','DATE','','');
+            $options['csv_output'] = 'YES';
+            $output = array();
+            $align = 'L';
             
             //get html and csv data
-            $html_div=Html::mysqlDrawTable($result['time'],$row_h,$col_w,$col_type,$align,$options,$output);
+            $html_div = Html::mysqlDrawTable($result['time'],$row_h,$col_w,$col_type,$align,$options,$output);
             //save csv data to cache table
             //couls use user specific cash or modify csv_id to be user specific
             //Csv::csvUpdate($db,$csv_id,$output['csv_data']);
             $cache->store($csv_id,$output['csv_data']);
             //display table and link to csv cache data
-            $html.='<div>'.$csv_link.$html_div.'</div>';
+            $html .= '<div>'.$csv_link.$html_div.'</div>';
         }
         return $html; 
     } 
@@ -454,25 +454,25 @@ class Helpers {
         $cache = $container['cache'];
         $cache->setCache('CSV');
 
-        $sql = 'SELECT name,email,status,date_statement_start '.
-               'FROM '.TABLE_PREFIX.'client WHERE client_id = "'.$db->escapeSql($client_id).'" ';
+        $sql = 'SELECT `name`,`email`,`status`,`date_statement_start` '.
+               'FROM `'.TABLE_PREFIX.'client` WHERE `client_id` = "'.$db->escapeSql($client_id).'" ';
         $client = $db->readSqlRecord($sql); 
         if($client == 0) $error_str .= 'Invalid client ID['.$client_id.'] ';
         
         if($error_str == '') {
-            $sql = 'SELECT invoice_id,invoice_no,total,date FROM '.TABLE_PREFIX.'invoice '.
-                   'WHERE client_id = "'.$db->escapeSql($client_id).'" AND '.
-                         'date >= "'.$db->escapeSql($from_date).'" AND '.
-                         'date <= "'.$db->escapeSql($to_date).'" '.
-                   'ORDER BY date ';
+            $sql = 'SELECT `invoice_id`,`invoice_no`,`total`,`date` FROM `'.TABLE_PREFIX.'invoice` '.
+                   'WHERE `client_id` = "'.$db->escapeSql($client_id).'" AND '.
+                         '`date` >= "'.$db->escapeSql($from_date).'" AND '.
+                         '`date` <= "'.$db->escapeSql($to_date).'" '.
+                   'ORDER BY `date` ';
             $invoices = $db->readSqlArray($sql); 
             if($invoices == 0) $error_str .= 'NO invoices found over period from['.$from_date.'] to ['.$to_date.'] ';
             
-            $sql = 'SELECT payment_id,amount,date,description FROM '.TABLE_PREFIX.'payment '.
-                   'WHERE client_id = "'.$db->escapeSql($client_id).'" AND '.
-                         'date >= "'.$db->escapeSql($from_date).'" AND '.
-                         'date <= "'.$db->escapeSql($to_date).'" '.
-                   'ORDER BY date ';
+            $sql = 'SELECT `payment_id`,`amount`,`date`,`description` FROM `'.TABLE_PREFIX.'payment` '.
+                   'WHERE `client_id` = "'.$db->escapeSql($client_id).'" AND '.
+                         '`date` >= "'.$db->escapeSql($from_date).'" AND '.
+                         '`date` <= "'.$db->escapeSql($to_date).'" '.
+                   'ORDER BY `date` ';
             $payments = $db->readSqlArray($sql); 
         }  
         
@@ -548,25 +548,25 @@ class Helpers {
         $cache = $container['cache'];
         $cache->setCache('CSV');
         
-        $sql = 'SELECT name,email,status,date_statement_start '.
-               'FROM '.TABLE_PREFIX.'client WHERE client_id = "'.$db->escapeSql($client_id).'" ';
+        $sql = 'SELECT `name`,`email`,`status`,`date_statement_start` '.
+               'FROM `'.TABLE_PREFIX.'client` WHERE `client_id` = "'.$db->escapeSql($client_id).'" ';
         $client = $db->readSqlRecord($sql); 
         if($client == 0) $error_str.='Invalid client ID['.$client_id.'] ';
         
         if($error_str == '') {
-            $sql = '(SELECT "INVOICE" AS type,invoice_no AS text,total AS amount,date FROM '.TABLE_PREFIX.'invoice '.
-                    'WHERE client_id = "'.$db->escapeSql($client_id).'" AND '.
-                          'date >= "'.$db->escapeSql($from_date).'" AND '.
-                          'date <= "'.$db->escapeSql($to_date).'" )';
+            $sql = '(SELECT "INVOICE" AS `type`,`invoice_no` AS `text`,`total` AS `amount`,`date` FROM `'.TABLE_PREFIX.'invoice` '.
+                    'WHERE `client_id` = "'.$db->escapeSql($client_id).'" AND '.
+                          '`date` >= "'.$db->escapeSql($from_date).'" AND '.
+                          '`date` <= "'.$db->escapeSql($to_date).'" )';
             
             $sql .= ' UNION ALL ';
             
-            $sql .= '(SELECT "PAYMENT",description,amount,date FROM '.TABLE_PREFIX.'payment '.
-                     'WHERE client_id = "'.$db->escapeSql($client_id).'" AND '.
-                           'date >= "'.$db->escapeSql($from_date).'" AND '.
-                           'date <= "'.$db->escapeSql($to_date).'" )';
+            $sql .= '(SELECT "PAYMENT",`description`,`amount`,`date` FROM `'.TABLE_PREFIX.'payment` '.
+                     'WHERE `client_id` = "'.$db->escapeSql($client_id).'" AND '.
+                           '`date` >= "'.$db->escapeSql($from_date).'" AND '.
+                           '`date` <= "'.$db->escapeSql($to_date).'" )';
                                  
-            $sql .= ' ORDER BY date ';
+            $sql .= ' ORDER BY `date` ';
             $entries = $db->readSqlArray($sql,$first_col_key); 
         }  
         
@@ -631,9 +631,9 @@ class Helpers {
         $options['format'] = 'HTML';
         $options['file_links'] = true;
         
-        $sql = 'SELECT task_id,client_id,name,description,date_create,status '.
-               'FROM '.TABLE_PREFIX.'task '.
-               'WHERE task_id = "'.$db->escapeSql($task_id).'" ';
+        $sql = 'SELECT `task_id`,`client_id`,`name`,`description`,`date_create`,`status` '.
+               'FROM `'.TABLE_PREFIX.'task` '.
+               'WHERE `task_id` = "'.$db->escapeSql($task_id).'" ';
         $task = $db->readSqlRecord($sql);
         
         $content = self::taskReport($db,$container,$task_id,$options,$error_tmp);
@@ -667,9 +667,9 @@ class Helpers {
         if(!isset($options['file_links'])) $options['file_links'] = true;
         if(!isset($options['format'])) $options['format'] = 'TEXT'; //or HTML
         
-        $sql = 'SELECT task_id,client_id,name,description,date_create,status '.
-               'FROM '.TABLE_PREFIX.'task '.
-               'WHERE task_id = "'.$db->escapeSql($task_id).'" ';
+        $sql = 'SELECT `task_id`,`client_id`,`name`,`description`,`date_create`,`status` '.
+               'FROM `'.TABLE_PREFIX.'task` '.
+               'WHERE `task_id` = "'.$db->escapeSql($task_id).'" ';
         $task = $db->readSqlRecord($sql);
         if($options['format'] === 'TEXT') {
             $output .= $options['task_type'].': '.strtoupper($task['name']).' created on '.Date::formatDate($task['date_create'])."\r\n";
@@ -681,9 +681,9 @@ class Helpers {
             $output .= '<p>'.nl2br($task['description']).'</p><br/>';
         }   
         
-        $sql = 'SELECT diary_id,date,subject,notes FROM '.TABLE_PREFIX.'task_diary '.
-               'WHERE task_id = "'.$db->escapeSql($task_id).'" '.
-               'ORDER BY date, diary_id ';
+        $sql = 'SELECT `diary_id`,`date`,`subject`,`notes` FROM `'.TABLE_PREFIX.'task_diary` '.
+               'WHERE `task_id` = "'.$db->escapeSql($task_id).'" '.
+               'ORDER BY `date`, `diary_id` ';
         $diary = $db->readSqlArray($sql);
         if($diary != 0) {
             foreach($diary as $id => $entry) {
@@ -707,9 +707,9 @@ class Helpers {
                 $expire_date = date('Y-m-d',time()+(30*24*60*60));
             }
              
-            $sql = 'SELECT file_id,file_name,file_name_orig,file_date,key_words '.
-                   'FROM '.TABLE_PREFIX.'files '.
-                   'WHERE location_id ="TSK'.$task_id.'" ORDER BY file_id ';
+            $sql = 'SELECT `file_id`,`file_name`,`file_name_orig`,`file_date`,`key_words` '.
+                   'FROM `'.TABLE_PREFIX.'files` '.
+                   'WHERE `location_id` = "TSK'.$task_id.'" ORDER BY `file_id` ';
             $files = $db->readSqlArray($sql,$db);
             if($files != 0) {
                 if($options['format'] === 'TEXT') {
@@ -742,4 +742,3 @@ class Helpers {
         return $output;  
     }    
 }
-?>

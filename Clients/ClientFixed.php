@@ -12,8 +12,8 @@ class ClientFixed extends Table
         parent::setup($param);       
 
         //NB: master_col_idX shoudl be replaced by suitable master table cols you wish to use
-        $this->setupMaster(array('table'=>TABLE_PREFIX.'client','key'=>'client_id','child_col'=>'client_id', 
-                                'show_sql'=>'SELECT CONCAT("Client:",name) FROM '.TABLE_PREFIX.'client WHERE client_id = "{KEY_VAL}" '));  
+        $this->setupMaster(array('table'=>TABLE_PREFIX.'client','key'=>'client_id','label'=>'name','child_col'=>'client_id', 
+                                'show_sql'=>'SELECT CONCAT("Client:",`name`) FROM `'.TABLE_PREFIX.'client` WHERE `client_id` = "{KEY_VAL}" '));  
 
         $this->addTableCol(array('id'=>'fixed_id','type'=>'INTEGER','title'=>'Fixed ID','key'=>true,'key_auto'=>true));
         $this->addTableCol(array('id'=>'name','type'=>'STRING','title'=>'Name'));
@@ -22,6 +22,7 @@ class ClientFixed extends Table
         $this->addTableCol(array('id'=>'repeat_period','type'=>'STRING','title'=>'Repeat'));
         $this->addTableCol(array('id'=>'repeat_date','type'=>'DATE','title'=>'Repeat date'));
 
+        $this->addAction(array('type'=>'check_box','text'=>''));
         $this->addAction(array('type'=>'edit','text'=>'edit'));
         $this->addAction(array('type'=>'delete','text'=>'delete','pos'=>'R'));
 
@@ -30,4 +31,3 @@ class ClientFixed extends Table
         $this->addSelect('repeat_period','(SELECT "MONTHLY") UNION (SELECT "ANNUALY")'); 
     }  
 }
-?>

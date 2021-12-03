@@ -67,8 +67,8 @@ class PaymentWizard
         $unlinked_payments_only = true;
 
         //keywords for ALL clients to match with payments and update existing keywords
-        $sql = 'SELECT client_id,keywords FROM '.TABLE_PREFIX.'client '.
-               'WHERE status = "ACTIVE" ORDER BY name ';
+        $sql = 'SELECT `client_id`,`keywords` FROM `'.TABLE_PREFIX.'client` '.
+               'WHERE `status` = "ACTIVE" ORDER BY `name` ';
         $client_keywords = $this->db->readSqlList($sql); 
         //keywords in payment description to ignore
         $word_ignore = array('THE','CREDIT','DEBIT','CARD','BANK','(PTY)','LTD','PAYMENT','PURCHASE',
@@ -82,10 +82,10 @@ class PaymentWizard
 
         if($this->mode === 'start') {
             //category=1 is "Clients"
-            $sql = 'SELECT A.account_id,CONCAT(C.name,": ",A.name)  '.
-                   'FROM '.TABLE_PREFIX_GL.'account AS A JOIN '.TABLE_PREFIX_GL.'company AS C ON(A.company_id = C.company_id) '.
-                   'WHERE A.type_id LIKE "INCOME%" '.
-                   'ORDER BY A.company_id,A.name';
+            $sql = 'SELECT A.`account_id`,CONCAT(C.`name`,": ",A.`name`)  '.
+                   'FROM `'.TABLE_PREFIX_GL.'account` AS A JOIN `'.TABLE_PREFIX_GL.'company` AS C ON(A.`company_id` = C.`company_id`) '.
+                   'WHERE A.`type_id` LIKE "INCOME%" '.
+                   'ORDER BY A.`company_id`,A.`name`';
 
             $html .= '<div id="wtf">'.
                      '<form method="post" action="?mode=review" name="create_review" id="create_review">'.
@@ -113,18 +113,18 @@ class PaymentWizard
             if(isset($_POST['match_client'])) $match_client = true; else $match_client = false;
             if(isset($_POST['unlinked_payments_only'])) $unlinked_payments_only = true; else $unlinked_payments_only = false;  
             
-            $sql = 'SELECT A.account_id,A.name,A.description,A.type_id,C.name AS company '.
-                   'FROM '.TABLE_PREFIX_GL.'account  AS A JOIN '.TABLE_PREFIX_GL.'company AS C ON(A.company_id = C.company_id)'.
-                   'WHERE A.account_id = "'.$account_id.'" ';
+            $sql = 'SELECT A.`account_id`,A.`name`,A.`description`,A.`type_id`,C.`name` AS `company` '.
+                   'FROM `'.TABLE_PREFIX_GL.'account`  AS A JOIN `'.TABLE_PREFIX_GL.'company` AS C ON(A.`company_id` = C.`company_id`)'.
+                   'WHERE A.`account_id` = "'.$account_id.'" ';
             $account = $this->db->readSqlRecord($sql);     
               
-            $sql = 'SELECT T.transact_id,T.date,T.amount,T.description '.
-                   'FROM '.TABLE_PREFIX_GL.'transact AS T ';
-            if($unlinked_payments_only) $sql .= 'LEFT JOIN '.TABLE_PREFIX.'payment AS P ON(T.transact_id = P.transact_id )';
-            $sql .= 'WHERE T.type_id = "CASH" AND T.debit_credit = "C" AND '.
-                          'T.account_id = "'.$account_id.'" AND '.
-                          'T.date >= "'.$from_date.'" AND T.date <= "'.$to_date.'" ';  
-            if($unlinked_payments_only) $sql .= 'AND P.client_id IS NULL ';            
+            $sql = 'SELECT T.`transact_id`,T.`date`,T.`amount`,T.`description` '.
+                   'FROM `'.TABLE_PREFIX_GL.'transact` AS T ';
+            if($unlinked_payments_only) $sql .= 'LEFT JOIN `'.TABLE_PREFIX.'payment` AS P ON(T.`transact_id` = P.`transact_id` )';
+            $sql .= 'WHERE T.`type_id` = "CASH" AND T.`debit_credit` = "C" AND '.
+                          'T.`account_id` = "'.$account_id.'" AND '.
+                          'T.`date` >= "'.$from_date.'" AND T.`date` <= "'.$to_date.'" ';  
+            if($unlinked_payments_only) $sql .= 'AND P.`client_id` IS NULL ';            
             $transactions = $this->db->readSqlArray($sql); 
             if($transactions == 0) {
               //echo $sql;
@@ -149,9 +149,9 @@ class PaymentWizard
                        '<tr><th>Transact ID</th><th>Date</th><th>Amount</th><th>Description</th><th>Possible Client</th></tr>';
                      
               //default all clients list
-              $sql = 'SELECT client_id,CONCAT(name,"[",invoice_prefix,"]") '.
-                     'FROM '.TABLE_PREFIX.'client '.
-                     'WHERE status = "ACTIVE" ORDER BY name ';
+              $sql = 'SELECT `client_id`,CONCAT(`name`,"[",invoice_prefix,"]") '.
+                     'FROM `'.TABLE_PREFIX.'client` '.
+                     'WHERE `status` = "ACTIVE" ORDER BY `name` ';
               $client_list_all = $this->db->readSqlList($sql);      
             
               foreach($transactions as $transact_id => $data) {
@@ -182,12 +182,12 @@ class PaymentWizard
                   }
                   
                   //check for clients that match name OR invoice prefix, OR key word match(if any)
-                  $sql = 'SELECT client_id,CONCAT(name,"[",invoice_prefix,"]") '.
-                         'FROM '.TABLE_PREFIX.'client '.
-                         'WHERE (invoice_prefix <> "" AND INSTR("'.$data['description'].'",invoice_prefix)>0) OR '.
-                         'INSTR("'.$data['description'].'",name)>0 ';
-                  if($key_client_id !== 'NONE') $sql .= 'OR client_id = "'.$key_client_id.'" ';     
-                  $sql .= 'ORDER BY NAME ';
+                  $sql = 'SELECT `client_id`,CONCAT(`name`,"[",invoice_prefix,"]") '.
+                         'FROM `'.TABLE_PREFIX.'client` '.
+                         'WHERE (`invoice_prefix` <> "" AND INSTR("'.$data['description'].'",`invoice_prefix`)>0) OR '.
+                         'INSTR("'.$data['description'].'",`name`)>0 ';
+                  if($key_client_id !== 'NONE') $sql .= 'OR `client_id` = "'.$key_client_id.'" ';     
+                  $sql .= 'ORDER BY `name` ';
                   $client_list_matched = $this->db->readSqlList($sql); 
                   if($client_list_matched != 0) {
                     //get first match
@@ -228,13 +228,13 @@ class PaymentWizard
             if(isset($_POST['unlinked_payments_only'])) $unlinked_payments_only = true; else $unlinked_payments_only = false;  
               
             //get all transactions for matching
-            $sql = 'SELECT T.transact_id,T.date,T.amount,T.description '.
-                   'FROM '.TABLE_PREFIX_GL.'transact AS T ';
-            if($unlinked_payments_only) $sql .= 'LEFT JOIN '.TABLE_PREFIX.'payment AS P ON(T.transact_id = P.transact_id )';
-            $sql .= 'WHERE T.type_id = "CASH" AND T.debit_credit = "C" AND '.
-                          'T.account_id = "'.$account_id.'" AND '.
-                          'T.date >= "'.$from_date.'" AND T.date <= "'.$to_date.'" ';  
-            if($unlinked_payments_only) $sql .= 'AND P.client_id IS NULL ';                       
+            $sql = 'SELECT T.`transact_id`,T.`date`,T.`amount`,T.`description` '.
+                   'FROM `'.TABLE_PREFIX_GL.'transact` AS T ';
+            if($unlinked_payments_only) $sql .= 'LEFT JOIN `'.TABLE_PREFIX.'payment` AS P ON(T.`transact_id` = P.`transact_id` )';
+            $sql .= 'WHERE T.`type_id` = "CASH" AND T.`debit_credit` = "C" AND '.
+                          'T.`account_id` = "'.$account_id.'" AND '.
+                          'T.`date` >= "'.$from_date.'" AND T.`date` <= "'.$to_date.'" ';  
+            if($unlinked_payments_only) $sql .= 'AND P.`client_id` IS NULL ';                       
             $transactions = $this->db->readSqlArray($sql); 
             if($transactions == 0) {
               $this->addError('NO Ledger payment transactions found from '.$from_date.' to '.$to_date.' ');
@@ -277,8 +277,8 @@ class PaymentWizard
                          
                         if($keywords_new != '') {
                           $keywords = trim($client_keywords[$client_id].' '.$keywords_new);
-                          $sql = 'UPDATE '.TABLE_PREFIX.'client SET keywords = "'.$this->db->escapeSql($keywords).'" '.
-                                 'WHERE client_id = "'.$this->db->escapeSql($client_id).'" ';
+                          $sql = 'UPDATE `'.TABLE_PREFIX.'client` SET `keywords` = "'.$this->db->escapeSql($keywords).'" '.
+                                 'WHERE `client_id` = "'.$this->db->escapeSql($client_id).'" ';
                           $this->db->executeSql($sql,$error);      
                         } 
                       }  

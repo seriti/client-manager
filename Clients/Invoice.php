@@ -19,7 +19,8 @@ class Invoice extends Table
 
         $this->addTableCol(array('id'=>'invoice_id','type'=>'INTEGER','title'=>'Invoice ID','key'=>true,'key_auto'=>true,'list'=>false));
         $this->addTableCol(array('id'=>'invoice_no','type'=>'STRING','title'=>'Invoice no'));
-        $this->addTableCol(array('id'=>'client_id','type'=>'INTEGER','title'=>'Client','join'=>'name FROM '.TABLE_PREFIX.'client WHERE client_id'));
+        $this->addTableCol(array('id'=>'client_id','type'=>'INTEGER','title'=>'Client',
+                                 'join'=>'`name` FROM `'.TABLE_PREFIX.'client` WHERE `client_id`'));
         $this->addTableCol(array('id'=>'date','type'=>'DATE','title'=>'Date'));
         //$this->addTableCol(array('id'=>'amount','type'=>'DECIMAL','title'=>'Amount'));
         //$this->addTableCol(array('id'=>'vat','type'=>'DECIMAL','title'=>'VAT'));
@@ -28,7 +29,7 @@ class Invoice extends Table
         //$this->addTableCol(array('id'=>'doc_name','type'=>'FILE','title'=>'Invoice document','required'=>false));
         $this->addTableCol(array('id'=>'status','type'=>'STRING','title'=>'Status','new'=>'OK'));
 
-        $this->addSortOrder('T.invoice_id DESC','Create date latest','DEFAULT');
+        $this->addSortOrder('T.`invoice_id` DESC','Create date latest','DEFAULT');
 
         $this->setupFiles(array('location'=>'INV','max_no'=>10,
                                 'table'=>TABLE_PREFIX.'files','list'=>true,'list_no'=>10,
@@ -42,7 +43,7 @@ class Invoice extends Table
 
         $this->addSearch(array('client_id','invoice_no','date','total','comment','status'),array('rows'=>2));
 
-        $this->addSelect('client_id','SELECT client_id,name FROM '.TABLE_PREFIX.'client ORDER BY name');
+        $this->addSelect('client_id','SELECT `client_id`,`name` FROM `'.TABLE_PREFIX.'client` ORDER BY `name`');
         $this->addSelect('status','(SELECT "OK") UNION (SELECT "PAID") UNION (SELECT "BAD_DEBT")');
 
         $this->addAction(array('type'=>'popup','text'=>'Items','url'=>'invoice_item','mode'=>'view','width'=>600,'height'=>800)); 
@@ -139,8 +140,8 @@ class Invoice extends Table
                 $audit_str .= 'invoice ID['.$invoice_id.'] ';
                                     
                 if($action === 'STATUS_CHANGE') {
-                  $sql = 'UPDATE '.$this->table.' SET status = "'.$this->db->escapeSql($status_change).'" '.
-                         'WHERE invoice_id = "'.$this->db->escapeSql($invoice_id).'" ';
+                  $sql = 'UPDATE `'.$this->table.'` SET `status` = "'.$this->db->escapeSql($status_change).'" '.
+                         'WHERE `invoice_id` = "'.$this->db->escapeSql($invoice_id).'" ';
                   $this->db->executeSql($sql,$error_tmp);
                   if($error_tmp === '') {
                     $message_str = 'Status set['.$status_change.'] for Invoice ID['.$invoice_id.'] ';
@@ -154,8 +155,8 @@ class Invoice extends Table
                 }
                 
                 if($action === 'EMAIL_INVOICE') {
-                  $sql = 'SELECT client_id,doc_name,invoice_no FROM '.$this->table.' '.
-                         'WHERE invoice_id = "'.$this->db->escapeSql($invoice_id).'" ';
+                  $sql = 'SELECT `client_id`,`doc_name`,`invoice_no` FROM `'.$this->table.'` '.
+                         'WHERE `invoice_id` = "'.$this->db->escapeSql($invoice_id).'" ';
                   $invoice = $this->db->readSqlRecord($sql);
                   
                   Helpers::sendInvoice($this->db,$this->container,$invoice['client_id'],$invoice_id,$email_address,$error_tmp);

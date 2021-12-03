@@ -68,8 +68,8 @@ class InvoicePaymentWizard
         $unlinked_payments_only = true;
 
         //keywords for ALL clients to match with payments and update existing keywords
-        $sql = 'SELECT client_id,keywords FROM '.TABLE_PREFIX.'client '.
-               'WHERE status = "ACTIVE" ORDER BY name ';
+        $sql = 'SELECT `client_id`,`keywords` FROM `'.TABLE_PREFIX.'client` '.
+               'WHERE `status` = "ACTIVE" ORDER BY `name` ';
         $client_keywords = $this->db->readSqlList($sql); 
         //keywords in payment description to ignore
         $word_ignore = array('THE','CREDIT','DEBIT','CARD','BANK','(PTY)','LTD','PAYMENT','PURCHASE',
@@ -83,10 +83,10 @@ class InvoicePaymentWizard
 
         if($this->mode === 'start') {
             //category=1 is "Clients"
-            $sql = 'SELECT A.account_id,CONCAT(C.name,": ",A.name)  '.
-                   'FROM '.TABLE_PREFIX_GL.'account AS A JOIN '.TABLE_PREFIX_GL.'company AS C ON(A.company_id = C.company_id) '.
-                   'WHERE A.type_id LIKE "INCOME%" '.
-                   'ORDER BY A.company_id,A.name';
+            $sql = 'SELECT A.`account_id`,CONCAT(C.`name`,": ",A.`name`)  '.
+                   'FROM `'.TABLE_PREFIX_GL.'account` AS A JOIN `'.TABLE_PREFIX_GL.'company` AS C ON(A.`company_id` = C.`company_id`) '.
+                   'WHERE A.`type_id` LIKE "INCOME%" '.
+                   'ORDER BY A.`company_id`,A.`name`';
 
             $html .= '<div id="wtf">'.
                      '<form method="post" action="?mode=review" name="create_review" id="create_review">'.
@@ -111,11 +111,11 @@ class InvoicePaymentWizard
             $to_date = Secure::clean('date',$_POST['to_date']);
                 
             //get all unpaid invoices
-            $sql = 'SELECT I.invoice_id,I.invoice_no,I.total,I.date,I.client_id,C.name '.
-                   'FROM '.TABLE_PREFIX.'invoice AS I JOIN '.TABLE_PREFIX.'client AS C ON(I.client_id = C.client_id) '.
-                   'WHERE I.status = "OK" AND '.
-                         'I.date >= "'.$from_date.'" AND I.date <= "'.$to_date.'" '.
-                   'ORDER BY I.date';
+            $sql = 'SELECT I.`invoice_id`,I.`invoice_no`,I.`total`,I.`date`,I.`client_id`,C.`name` '.
+                   'FROM `'.TABLE_PREFIX.'invoice` AS I JOIN `'.TABLE_PREFIX.'client` AS C ON(I.`client_id` = C.`client_id`) '.
+                   'WHERE I.`status` = "OK" AND '.
+                         'I.`date` >= "'.$from_date.'" AND I.`date` <= "'.$to_date.'" '.
+                   'ORDER BY I.`date`';
             $invoices = $this->db->readSqlArray($sql); 
             
             if($invoices == 0) {
@@ -132,12 +132,12 @@ class InvoicePaymentWizard
                 //default payment allocations
                 $param['xtra'] = array('NONE'=>'NO matching payment','PAID'=>'Mark as PAID','BAD_DEBT'=>'Mark as BAD DEBT');
                 foreach($invoices as $invoice_id => $data) {
-                    $sql = 'SELECT transact_id,CONCAT(amount," : ",DATE(date)," : ",description) '.
-                           'FROM '.TABLE_PREFIX_GL.'transact '.
-                           'WHERE type_id = "CASH" AND debit_credit = "C" AND '.
-                                 'account_id = "'.$account_id.'" AND '.
-                                 'DATEDIFF(date,"'.$data['date'].'") > -7 AND DATEDIFF(date,"'.$data['date'].'") < 60 AND '.
-                                 'ABS(amount - '.$data['total'].') < 10 ';
+                    $sql = 'SELECT `transact_id`,CONCAT(`amount`," : ",DATE(`date`)," : ",`description`) '.
+                           'FROM `'.TABLE_PREFIX_GL.'transact` '.
+                           'WHERE `type_id` = "CASH" AND `debit_credit` = "C" AND '.
+                                 '`account_id` = "'.$account_id.'" AND '.
+                                 'DATEDIFF(`date`,"'.$data['date'].'") > -7 AND DATEDIFF(`date`,"'.$data['date'].'") < 60 AND '.
+                                 'ABS(`amount` - '.$data['total'].') < 10 ';
                                          
                     $transact_id = 'NONE';  
                     
@@ -159,11 +159,11 @@ class InvoicePaymentWizard
             $to_date = Secure::clean('date',$_POST['to_date']);
                 
             //get all unpaid invoices
-            $sql = 'SELECT I.invoice_id,I.invoice_no,I.total,I.date,I.client_id,C.name '.
-                   'FROM '.TABLE_PREFIX.'invoice AS I JOIN '.TABLE_PREFIX.'client AS C ON(I.client_id = C.client_id) '.
-                   'WHERE I.status = "OK" AND '.
-                         'I.date >= "'.$from_date.'" AND I.date <= "'.$to_date.'" '.
-                   'ORDER BY I.date';
+            $sql = 'SELECT I.`invoice_id`,I.`invoice_no`,I.`total`,I.`date`,I.`client_id`,C.`name` '.
+                   'FROM `'.TABLE_PREFIX.'invoice` AS I JOIN `'.TABLE_PREFIX.'client` AS C ON(I.`client_id` = C.`client_id`) '.
+                   'WHERE I.`status` = "OK" AND '.
+                         'I.`date` >= "'.$from_date.'" AND I.`date` <= "'.$to_date.'" '.
+                   'ORDER BY I.`date`';
             $invoices = $this->db->readSqlArray($sql); 
             foreach($invoices as $invoice_id => $data) {
                 if(isset($_POST['transact_'.$invoice_id])) {
@@ -200,7 +200,3 @@ class InvoicePaymentWizard
     }
 
 }
-
-?>
-
-

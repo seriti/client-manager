@@ -23,7 +23,7 @@ class TaskFile extends Upload
         $param['label']     = 'name';
         $param['child_col'] = 'location_id';
         $param['child_prefix'] = $id_prefix;
-        $param['show_sql'] = 'SELECT CONCAT("Task: ",name) FROM '.TABLE_PREFIX.'task WHERE task_id = "{KEY_VAL}"';
+        $param['show_sql'] = 'SELECT CONCAT("Task: ",`name`) FROM `'.TABLE_PREFIX.'task` WHERE `task_id` = "{KEY_VAL}"';
         $this->setupMaster($param);
 
         $this->addAction('delete');

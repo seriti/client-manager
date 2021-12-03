@@ -13,7 +13,7 @@ class TaskDiary extends Table
                        
         //NB: specify master table relationship
         $this->setupMaster(array('table'=>TABLE_PREFIX.'task','key'=>'task_id','child_col'=>'task_id', 
-                                 'show_sql'=>'SELECT CONCAT("'.$page_title.'",name) FROM '.TABLE_PREFIX.'task WHERE task_id = "{KEY_VAL}" '));  
+                                 'show_sql'=>'SELECT CONCAT("'.$page_title.'",`name`) FROM `'.TABLE_PREFIX.'task` WHERE `task_id` = "{KEY_VAL}" '));  
 
         
         $this->addTableCol(array('id'=>'diary_id','type'=>'INTEGER','title'=>'Diary ID','key'=>true,'key_auto'=>true,'list'=>false));
