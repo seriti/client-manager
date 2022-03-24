@@ -26,6 +26,12 @@ class InvoiceSetup extends SetupModule
         $this->addDefault('TEXTAREA','INVOICE_FOOTER','Invoice PDF footer',$param);
 
         $param = [];
+        $param['info'] = 'Specify Credit Note footer text / ie if client should deduyct from next invoice / or any info you require to be added.';
+        $param['rows'] = 10;
+        $param['value'] = '';
+        $this->addDefault('TEXTAREA','CREDIT_FOOTER','Credit Note PDF footer',$param);
+
+        $param = [];
         $param['info'] = 'Select the image you would like to use as an invoice signature (max 50KB)';
         $param['max_size'] = 50000;
         $param['value'] = 'images/sample_sig.jpeg';

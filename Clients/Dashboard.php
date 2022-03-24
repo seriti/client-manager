@@ -24,6 +24,7 @@ class Dashboard extends DashboardTool
         $this->addItem('WIZARD','Invoice wizard',['link'=>'invoice_wizard']);
         $this->addItem('WIZARD','Match Ledger payments to clients',['link'=>'payment_wizard']);
         $this->addItem('WIZARD','Update Invoice status and match payments',['link'=>'invoice_payment_wizard']);
+        $this->addItem('WIZARD','Credit Note wizard',['link'=>'credit_wizard']);
              
         $this->addBlock('SETUP',1,2,'Setup');
         $this->addItem('SETUP','Time keeping types',['link'=>'timetype']);

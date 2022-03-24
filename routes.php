@@ -12,6 +12,10 @@ $app->group('/admin', function () {
         $this->any('/client', \App\Clients\ClientController::class);
         $this->any('/client_fixed', \App\Clients\ClientFixedController::class);
         $this->any('/client_payment', \App\Clients\ClientPaymentController::class);
+        $this->any('/credit', \App\Clients\CreditController::class);
+        $this->any('/credit_item', \App\Clients\CreditItemController::class);
+        $this->any('/credit_file', \App\Clients\CreditFileController::class);
+        $this->any('/credit_wizard', \App\Clients\CreditWizardController::class);
         $this->any('/payment', \App\Clients\PaymentController::class);
         $this->any('/payment_wizard', \App\Clients\PaymentWizardController::class);
         $this->any('/task', \App\Clients\TaskController::class);
@@ -30,6 +34,7 @@ $app->group('/admin', function () {
         $this->any('/report', \App\Clients\ReportController::class);
         $this->get('/setup_data', \App\Clients\SetupDataController::class);
     })->add(\App\Clients\Config::class);
+
 
 
 })->add(\App\User\ConfigAdmin::class);

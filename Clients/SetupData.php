@@ -8,7 +8,7 @@ class SetupData extends SetupModuledata
 
     public function setupSql()
     {
-        $this->tables = ['client','invoice','invoice_data','invoice_fixed','time','time_type','user_extend','payment','files','task','task_diary'];
+        $this->tables = ['client','credit','credit_data','invoice','invoice_data','invoice_fixed','time','time_type','user_extend','payment','files','task','task_diary'];
 
         $this->addCreateSql('client',
                             'CREATE TABLE `TABLE_NAME` (
@@ -17,6 +17,7 @@ class SetupData extends SetupModuledata
                                 `email` varchar(64) NOT NULL,
                                 `status` varchar(16) NOT NULL,
                                 `invoice_no` int(11) NOT NULL,
+                                `credit_no` int(11) NOT NULL,
                                 `contact_name` varchar(64) NOT NULL,
                                 `invoice_prefix` varchar(8) NOT NULL,
                                 `email_alt` varchar(64) NOT NULL,
@@ -25,8 +26,37 @@ class SetupData extends SetupModuledata
                                 PRIMARY KEY (`client_id`)
                             ) ENGINE=MyISAM DEFAULT CHARSET=utf8'); 
 
+        $this->addCreateSql('credit',
+                            'CREATE TABLE `TABLE_NAME` (
+                                `credit_id` int(11) NOT NULL AUTO_INCREMENT,
+                                `client_id` int(11) NOT NULL,
+                                `credit_no` varchar(16) NOT NULL,
+                                `amount` double NOT NULL,
+                                `vat` double NOT NULL,
+                                `total` double NOT NULL,
+                                `date` date NOT NULL,
+                                `comment` text NOT NULL,
+                                `status` varchar(16) NOT NULL,
+                                `doc_name` varchar(255) NOT NULL,
+                                
+                                PRIMARY KEY (`credit_id`)
+                            ) ENGINE=MyISAM DEFAULT CHARSET=utf8');  
+
+        $this->addCreateSql('credit_data',
+                            'CREATE TABLE `TABLE_NAME` (
+                                `data_id` int(11) NOT NULL AUTO_INCREMENT,
+                                `credit_id` int(11) NOT NULL,
+                                `item` varchar(250) NOT NULL,
+                                `quantity` decimal(12,2) NOT NULL,
+                                `price` decimal(12,2) NOT NULL,
+                                `total` decimal(12,2) NOT NULL,
+                                PRIMARY KEY (`data_id`)
+                            ) ENGINE=MyISAM  DEFAULT CHARSET=utf8');
+
         $this->addCreateSql('invoice',
                             'CREATE TABLE `TABLE_NAME` (
+                                `invoice_id` int(11) NOT NULL AUTO_INCREMENT,
+                                `client_id` int(11) NOT NULL,
                                 `invoice_no` varchar(16) NOT NULL,
                                 `amount` double NOT NULL,
                                 `vat` double NOT NULL,
@@ -35,8 +65,6 @@ class SetupData extends SetupModuledata
                                 `comment` text NOT NULL,
                                 `status` varchar(16) NOT NULL,
                                 `doc_name` varchar(255) NOT NULL,
-                                `invoice_id` int(11) NOT NULL AUTO_INCREMENT,
-                                `client_id` int(11) NOT NULL,
                                 PRIMARY KEY (`invoice_id`)
                             ) ENGINE=MyISAM DEFAULT CHARSET=utf8');  
 
@@ -49,7 +77,7 @@ class SetupData extends SetupModuledata
                                 `price` decimal(12,2) NOT NULL,
                                 `total` decimal(12,2) NOT NULL,
                                 PRIMARY KEY (`data_id`)
-                            ) ENGINE=InnoDB  DEFAULT CHARSET=utf8');
+                            ) ENGINE=MyISAM  DEFAULT CHARSET=utf8');
 
         $this->addCreateSql('invoice_fixed',
                             'CREATE TABLE `TABLE_NAME` (
@@ -163,7 +191,10 @@ class SetupData extends SetupModuledata
         $this->addUpdateSql('2019-01-16 00:02','DELETE FROM `TABLE_PREFIXtask` WHERE `name` = "wtf"');
         $this->addUpdateSql('2019-01-16 00:03','INSERT INTO `TABLE_PREFIXtask` (`name`,`description`,`status`,`date_create`,`client_id`) VALUES("wtf","wtf desc","OK","2018-12-12",63)');
         $this->addUpdateSql('2019-01-16 00:04','DELETE FROM `TABLE_PREFIXtask` WHERE `name` = "wtf"','REMOVE "wtf" tasks');
+        $this->addUpdateSql('2022-03-22 12:00','ALTER TABLE `TABLE_PREFIXclient` ADD COLUMN `credit_no` INT NOT NULL AFTER `invoice_no`');
+
         
+
     }
     
     

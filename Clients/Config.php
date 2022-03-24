@@ -42,9 +42,13 @@ class Config
         define('MODULE_ID','CLIENTS');
         define('MODULE_LOGO','<img src="'.BASE_URL.'images/clients40.png"> ');
         //define('MODULE_NAV',seriti_custom::get_system_default($conn,'MODULE_NAV','TABS'));
-        define('MODULE_PAGE',URL_CLEAN_LAST);       
+        define('MODULE_PAGE',URL_CLEAN_LAST);  
+
+        $page_active = MODULE_PAGE;
+        if($page_active === 'credit_wizard') $page_active = 'credit';
+        if($page_active === 'invoice_wizard') $page_active = 'invoice';
         
-        $submenu_html = $menu->buildNav($module['route_list'],MODULE_PAGE);
+        $submenu_html = $menu->buildNav($module['route_list'],$page_active);
         $this->container->view->addAttribute('sub_menu',$submenu_html);
         
 

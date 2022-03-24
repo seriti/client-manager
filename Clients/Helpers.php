@@ -163,6 +163,103 @@ class Helpers {
         $pdf->Output($file_path,'F');   
                 
         if($error_str == '') return true; else return false ;
+    }
+
+    public static function createCreditPdf($db,$system,$client_id,$data = array(),&$doc_name,&$error_str) {
+        
+        $error_str = '';
+        $pdf_dir = BASE_UPLOAD.UPLOAD_DOCS;
+        //for custom settings like signature
+        $upload_dir = BASE_UPLOAD.UPLOAD_DOCS;
+        
+        $credit_no = 'CREDIT-'.$data['no'];
+        $pdf_name = $credit_no.'.pdf';
+        $doc_name = $pdf_name;
+            
+        $sql = 'SELECT * FROM `'.TABLE_PREFIX.'client` WHERE `client_id` = "'.$db->escapeSql($client_id).'"';
+        $client = $db->readSqlRecord($sql,$db); 
+        
+        //get setup options
+        $footer = $system->getDefault('CREDIT_FOOTER','');
+        $signature = $system->getDefault('INVOICE_SIGN','');
+        $signature_text = $system->getDefault('INVOICE_SIG_TXT','');
+                    
+        $pdf = new Pdf('Portrait','mm','A4');
+        $pdf->AliasNbPages();
+            
+        $pdf->setupLayout(['db'=>$db]);
+        
+        //NB footer must be set before this
+        $pdf->AddPage();
+
+        $row_h = 5;
+                                 
+        $pdf->SetY(40);
+        $pdf->changeFont('H1');
+        $pdf->Cell(30,$row_h,'CREDIT NOTE :',0,0,'R',0);
+        $pdf->Cell(30,$row_h,$data['no'],0,0,'L',0);
+        $pdf->Ln($row_h);
+        $pdf->Cell(30,$row_h,'To :',0,0,'R',0);
+        $pdf->Cell(30,$row_h,$data['for'],0,0,'L',0);
+        $pdf->Ln($row_h);
+        $pdf->Cell(30,$row_h,'Date issued :',0,0,'R',0);
+        $pdf->Cell(30,$row_h,$data['date'],0,0,'L',0); //date('j-F-Y')
+        $pdf->Ln($row_h);
+        $pdf->Ln($row_h);
+        
+                        
+        //credit items table
+        if(count($data['items'] != 0)) {
+            $pdf->changeFont('TEXT');
+            $col_width = array(20,100,20,20);
+            $col_type = array('DBL2','','DBL2','DBL2');
+            $pdf->arrayDrawTable($data['items'],$row_h,$col_width,$col_type,'L');
+        }
+        
+        //totals
+        $pdf->changeFont('H3');
+        $pdf->Cell(142,$row_h,'SUBTOTAL :',0,0,'R',0);
+        $pdf->Cell(142,$row_h,number_format($data['subtotal'],2),0,0,'L',0);
+        $pdf->Ln($row_h);
+        $pdf->Cell(142,$row_h,'VAT :',0,0,'R',0);
+        $pdf->Cell(142,$row_h,$data['vat'],0,0,'L',0);
+        $pdf->Ln($row_h);
+        $pdf->Cell(142,$row_h,'TOTAL :',0,0,'R',0);
+        $pdf->Cell(142,$row_h,number_format($data['total'],2),0,0,'L',0);
+        $pdf->Ln($row_h);
+        $pdf->Ln($row_h);
+            
+        if($data['comment'] != '') {
+            $pdf->MultiCell(0,$row_h,$data['comment'],0,'L',0); 
+            $pdf->Ln($row_h);
+        }
+                
+        //custom footer text, if any.
+        $pdf->MultiCell(0,$row_h,$footer,0,'L',0);      
+        $pdf->Ln($row_h);
+                
+        if($signature != '') {
+            $image_path = $upload_dir.$signature;
+            list($img_width,$img_height) = getimagesize($image_path);
+            //height specified and width=0 so auto calculated     
+            $y1 = $pdf->GetY();
+            $pdf->Image($image_path,20,$y1,0,20);
+            //$pdf->Image('images/sig_XXX.jpg',20,$y1,66,20);
+            $pdf->SetY($y1+25);
+        } else {
+            $pdf->Ln($row_h*3); 
+        }   
+        
+        if($signature_text != '') {    
+            $pdf->Cell(0,$row_h,$signature_text,0,0,'L',0);
+            $pdf->Ln($row_h);
+        }  
+        
+        //finally create pdf file
+        $file_path = $pdf_dir.$pdf_name;
+        $pdf->Output($file_path,'F');   
+                
+        if($error_str == '') return true; else return false ;
     } 
     
     public static function saveInvoice($db,$system,$s3,$client_id,$data=array(),$doc_name,&$error_str) {
@@ -247,6 +344,90 @@ class Helpers {
         }
         
         if($error_str == '') return $invoice_id; else return false;
+    } 
+
+    public static function saveCredit($db,$system,$s3,$client_id,$data=array(),$doc_name,&$error_str) {
+        $error_tmp = '';
+        $error_str = '';
+     
+        $pdf_dir = BASE_UPLOAD.UPLOAD_DOCS; 
+        
+        $credit = array();
+        $credit['credit_no'] = $data['no'];
+        $credit['client_id'] = $client_id;
+        $credit['amount'] = $data['subtotal'];
+        $credit['vat'] = $data['vat'];
+        $credit['total'] = $data['total'];
+        $credit['date'] = $data['date'];//date('Y-m-d');
+        $credit['comment'] = $data['comment'];
+        $credit['status'] = "OK";
+        $credit['doc_name'] = $doc_name;
+        
+        //save credit
+        $credit_id = $db->insertRecord(TABLE_PREFIX.'credit',$credit,$error_tmp);
+        if($error_tmp != '') $error_str .= 'Could not create credit note record!';
+        
+        //save credit item data
+        if($error_str == '') {
+            $items = $data['items'];
+            $item_no = count($items[0])-1; //first line contains headers
+            for($i = 1; $i <= $item_no; $i++) {
+                $credit_data = array();
+                $credit_data['credit_id'] = $credit_id;
+                $credit_data['quantity'] = $items[0][$i];
+                $credit_data['item'] = $items[1][$i];
+                $credit_data['price'] = $items[2][$i];
+                $credit_data['total'] = $items[3][$i];
+                 
+                $db->insertRecord(TABLE_PREFIX.'credit_data',$credit_data,$error_tmp);
+                if($error_tmp != '') $error_str .= 'Could not add credit item['.$credit_data['item'].']!<br/>';              
+            } 
+        }
+        
+        //create file table record and rename credit doc
+        if($error_str == '') { 
+            $location_id = 'CRD'.$credit_id;
+            $file_id = Calc::getFileId($db);
+            $file_name = $file_id.'.pdf';
+            $pdf_path_old = $pdf_dir.$doc_name;
+            $pdf_path_new = $pdf_dir.$file_name;
+            //rename doc to new guaranteed non-clashing name
+            if(!rename($pdf_path_old,$pdf_path_new)) {
+                $error_str .= 'Could not rename credit pdf!<br/>'; 
+            } 
+        }
+        
+        //create file records and upload to amazon if required
+        if($error_str == '') {    
+            $file = array();
+            $file['file_id'] = $file_id; 
+            $file['file_name'] = $file_name;
+            $file['file_name_orig'] = $doc_name;
+            $file['file_ext'] = 'pdf';
+            $file['file_date'] = date('Y-m-d');
+            $file['location_id'] = $location_id;
+            $file['encrypted'] = false;
+            $file['file_size'] = filesize($pdf_path_new); 
+            
+            if(STORAGE === 'amazon') {
+                $s3->putFile($file['file_name'],$pdf_path_new,$error_tmp); 
+                if($error_tmp !== '') $error_str.='Could NOT upload files to Amazon S3 storage!<br/>';
+            } 
+            
+            if($error_str == '') {
+                $db->insertRecord(TABLE_PREFIX.'files',$file,$error_tmp);
+                if($error_tmp != '') $error_str .= 'ERROR creating credit file record: '.$error_tmp.'<br/>';
+            }   
+        }   
+        
+        if($error_str == '') {      
+            $sql = 'UPDATE `'.TABLE_PREFIX.'client` SET `credit_no` = `credit_no` + 1 '.
+                   'WHERE `client_id` = "'.$db->escapeSql($client_id).'" ';              
+            $db->executeSql($sql,$error_tmp); 
+            if($error_tmp !== '') $error_str .= 'Error updating client credit no counter!';     
+        }
+        
+        if($error_str == '') return $credit_id; else return false;
     }  
     
     //email invoice to client
@@ -307,6 +488,66 @@ class Helpers {
             $mail->sendEmail('',$mail_to,$subject,$body,$error_tmp,$param);
             if($error_tmp != '') { 
                 $error_str .= 'Error sending invoice email with attachments to email['. $mail_to.']:'.$error_tmp; 
+            }       
+        }  
+            
+        if($error_str == '') return true; else return false;  
+    }
+
+    //email credit note to client
+    public static function sendCredit($db,ContainerInterface $container,$client_id,$credit_id,$mail_to,&$error_str) {
+        $error_str = '';
+        $error_tmp = '';
+        $attach_msg = '';
+                
+        $system = $container['system'];
+        $mail = $container['mail'];
+
+        $sql = 'SELECT * FROM `'.TABLE_PREFIX.'credit` WHERE `credit_id` = "'.$db->escapeSql($credit_id).'"';
+        $credit = $db->readSqlRecord($sql); 
+                    
+        $sql = 'SELECT * FROM `'.TABLE_PREFIX.'client` WHERE `client_id` = "'.$db->escapeSql($client_id).'"';
+        $client = $db->readSqlRecord($sql); 
+        
+        //get all files related to credit
+        $attach = array();
+        $attach_file = array();
+
+        //NB: only using for download, all files associated with credit will be attached
+        $docs = new Upload($db,$container,TABLE_PREFIX.'files');
+        $docs->setup(['location'=>'CRD','interface'=>'download']);
+
+        $sql = 'SELECT `file_id`,`file_name_orig` FROM `'.TABLE_PREFIX.'files` '.
+               'WHERE `location_id` ="CRD'.$credit_id.'" ORDER BY `file_id` ';
+        $credit_files = $db->readSqlList($sql);
+        if($credit_files != 0) {
+            foreach($credit_files as $file_id => $file_name) {
+                $attach_file['name'] = $file_name;
+                $attach_file['path'] = $docs->fileDownload($file_id,'FILE'); 
+                if(substr($attach_file['path'],0,5) !== 'Error' and file_exists($attach_file['path'])) {
+                    $attach[] = $attach_file;
+                    $attach_msg .= $file_name."\r\n";
+                } else {
+                    $error_str .= 'Error fetching files for attachment to email!'; 
+                }   
+            }   
+        }
+            
+        //configure and send email
+        if($error_str == '') {
+            $subject = SITE_NAME.' Credit Note '.$credit['credit_no'];
+            $body = 'Attn. '.$client['name']."\r\n\r\n".
+                    'Please see attached credit['.$credit['doc_name'].'] and any supporting documents.'."\r\n\r\n";
+                        
+            if($attach_msg != '') $body .= 'All documents attached to this email: '."\r\n".$attach_msg."\r\n";
+                        
+            $mail_footer = $system->getDefault('EMAIL_FOOTER','');
+            $body .= $mail_footer."\r\n";
+                        
+            $param = ['attach'=>$attach];
+            $mail->sendEmail('',$mail_to,$subject,$body,$error_tmp,$param);
+            if($error_tmp != '') { 
+                $error_str .= 'Error sending credit note email with attachments to email['. $mail_to.']:'.$error_tmp; 
             }       
         }  
             
@@ -449,6 +690,7 @@ class Helpers {
         $html = '';
         $invoice_total = 0.00;
         $payment_total = 0.00;
+        $credit_total = 0.00;
         $balance = 0.00;
         
         $cache = $container['cache'];
@@ -474,6 +716,14 @@ class Helpers {
                          '`date` <= "'.$db->escapeSql($to_date).'" '.
                    'ORDER BY `date` ';
             $payments = $db->readSqlArray($sql); 
+
+            $sql = 'SELECT `credit_id`,`credit_no`,`total`,`date` FROM `'.TABLE_PREFIX.'credit` '.
+                   'WHERE `client_id` = "'.$db->escapeSql($client_id).'" AND '.
+                         '`date` >= "'.$db->escapeSql($from_date).'" AND '.
+                         '`date` <= "'.$db->escapeSql($to_date).'" '.
+                   'ORDER BY `date` ';
+            $credits = $db->readSqlArray($sql); 
+            if($credits == 0) $error_str .= 'NO credit notes found over period from['.$from_date.'] to ['.$to_date.'] ';
         }  
         
         if($error_str == '') {
@@ -493,10 +743,10 @@ class Helpers {
                      '<tr><th>INVOICE NO</th><th>Date</th><th>Amount</th></tr> ';
             foreach($invoices as $invoice_id => $invoice) {
                 $invoice_total += $invoice['total'];
-                $html .= '<tr><td>INV-'.$invoice['invoice_no'].'</td><td>'.Date::formatDate($invoice['date']).'</td>'.
+                $html .= '<tr><td>'.$invoice['invoice_no'].'</td><td>'.Date::formatDate($invoice['date']).'</td>'.
                              '<td>'.number_format($invoice['total'],2).'</td></tr>';
                                                      
-                $csv_row = 'INV-'.$invoice['invoice_no'].','.$invoice['date'].','.$invoice['total'];
+                $csv_row = $invoice['invoice_no'].','.$invoice['date'].','.$invoice['total'];
                 Csv::csvAddRow($csv_row,$csv_data);
             }  
             $html .= '</table>'; 
@@ -519,11 +769,30 @@ class Helpers {
                 }
                 $html .= '</table>';     
             }
+
+            if($credits != 0) {
+                $csv_row = 'CREDIT_NO,Date,Amount';
+                Csv::csvAddRow($csv_row,$csv_data);
+                
+                $html .= '<table class="table  table-striped table-bordered table-hover table-condensed">'.
+                         '<tr><th>CREDIT NO</th><th>Date</th><th>Amount</th></tr> ';
+                foreach($credits as $credit_id => $credit) {
+                    $credit_total += $credit['total'];
+                    $html .= '<tr><td>'.$credit['credit_no'].'</td><td>'.Date::formatDate($credit['date']).'</td>'.
+                                 '<td>'.number_format($credit['total'],2).'</td></tr>';
+                                                         
+                    $csv_row = $credit['credit_no'].','.$credit['date'].','.$credit['total'];
+                    Csv::csvAddRow($csv_row,$csv_data);
+                }  
+                $html .= '</table>';
+
+            }
             
             $html .= '<h2>Invoices total: '.number_format($invoice_total,2).'</h2>'; 
             $html .= '<h2>Payments total: '.number_format($payment_total,2).'</h2>';  
+            $html .= '<h2>Credits total: '.number_format($credit_total,2).'</h2>';  
             
-            $balance = $invoice_total-$payment_total;
+            $balance = $invoice_total - $payment_total - $credit_total;
             if($balance > 0) $str = 'OWED BY YOU'; else $str = 'DUE TO YOU';
             $html .= '<h2>BALANCE '.$str.': '.number_format($balance,2).'</h2>';  
             
@@ -561,10 +830,17 @@ class Helpers {
             
             $sql .= ' UNION ALL ';
             
-            $sql .= '(SELECT "PAYMENT",`description`,`amount`,`date` FROM `'.TABLE_PREFIX.'payment` '.
+            $sql .= '(SELECT "PAYMENT",`description` AS `text`,`amount`,`date` FROM `'.TABLE_PREFIX.'payment` '.
                      'WHERE `client_id` = "'.$db->escapeSql($client_id).'" AND '.
                            '`date` >= "'.$db->escapeSql($from_date).'" AND '.
                            '`date` <= "'.$db->escapeSql($to_date).'" )';
+
+            $sql .= ' UNION ALL ';
+
+            $sql .= '(SELECT "CREDIT" AS `type`,`credit_no` AS `text`,`total` AS `amount`,`date` FROM `'.TABLE_PREFIX.'credit` '.
+                    'WHERE `client_id` = "'.$db->escapeSql($client_id).'" AND '.
+                          '`date` >= "'.$db->escapeSql($from_date).'" AND '.
+                          '`date` <= "'.$db->escapeSql($to_date).'" )';
                                  
             $sql .= ' ORDER BY `date` ';
             $entries = $db->readSqlArray($sql,$first_col_key); 
@@ -595,8 +871,11 @@ class Helpers {
                 if($entry['type'] === 'INVOICE') {
                     $amount = $entry['amount'];
                     $text = 'INVOICE: '.$entry['text'];
-                } else {
-                    $amount = -1*$entry['amount'];
+                } elseif($entry['type'] === 'CREDIT') {
+                    $amount = -1 * $entry['amount'];
+                    $text = 'CREDIT: '.$entry['text'];
+                } elseif($entry['type'] === 'PAYMENT') {    
+                    $amount = -1 * $entry['amount'];
                     $text = 'PAYMENT: '.$entry['text'];
                 }
                 $balance += $amount;

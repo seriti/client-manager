@@ -9,7 +9,7 @@ This tells the framework about module: name, sub-memnu route list and title, dat
 $container['config']->set('module','clients',['name'=>'Client manager',
                                               'route_root'=>'admin/client/',
                                               'route_list'=>['dashboard'=>'Dashboard','client'=>'Clients','time'=>'Timesheets','task'=>'Tasks',
-                                                             'invoice'=>'Invoices','payment'=>'Payments','report'=>'Reports'],
+                                                             'invoice'=>'Invoices','credit'=>'Credits','payment'=>'Payments','report'=>'Reports'],
                                               'table_prefix'=>'clt_'
                                              ]);
 
