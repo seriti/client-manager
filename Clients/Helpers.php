@@ -723,7 +723,6 @@ class Helpers {
                          '`date` <= "'.$db->escapeSql($to_date).'" '.
                    'ORDER BY `date` ';
             $credits = $db->readSqlArray($sql); 
-            if($credits == 0) $error_str .= 'NO credit notes found over period from['.$from_date.'] to ['.$to_date.'] ';
         }  
         
         if($error_str == '') {
