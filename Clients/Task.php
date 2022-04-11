@@ -7,7 +7,7 @@ use Seriti\Tools\Secure;
 use Seriti\Tools\Validate;
 use Seriti\Tools\Audit;
 
-use App\Clients\Helpers;
+use App\Clients\HelpersReport;
 
 class Task extends Table 
 {
@@ -157,7 +157,7 @@ class Task extends Table
                                    'WHERE `task_id` = "'.$this->db->escapeSql($task_id).'" ';
                             $task = $this->db->readSqlRecord($sql);
                                                         
-                            Helpers::sendTaskReport($this->db,$this->container,$task['task_id'],$email_address,$error_tmp);
+                            HelpersReport::sendTaskReport($this->db,$this->container,$task['task_id'],$email_address,$error_tmp);
                             if($error_tmp == '') {
                                 $audit_str.= 'success!';
                                 $audit_count++;

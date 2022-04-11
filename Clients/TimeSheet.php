@@ -25,17 +25,17 @@ class TimeSheet
     protected $debug = false;
 
     protected $mode = 'list';
-    protected $errors = array();
+    protected $errors = [];
     protected $errors_found = false; 
-    protected $messages = array();
-
+    protected $messages = [];
+    
     protected $user_id;
 
     public function __construct(DbInterface $db, ContainerInterface $container) 
     {
         $this->db = $db;
         $this->container = $container;
-               
+       
         if(defined('\Seriti\Tools\DEBUG')) $this->debug = \Seriti\Tools\DEBUG;
     }
 

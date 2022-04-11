@@ -28,6 +28,8 @@ class InvoiceWizard extends Wizard
         $this->addVariable(array('id'=>'client_id','type'=>'INTEGER','title'=>'Client ID','max'=>1000000000));
         $this->addVariable(array('id'=>'from_date','type'=>'DATE','title'=>'From date'));
         $this->addVariable(array('id'=>'to_date','type'=>'DATE','title'=>'To date'));
+        $this->addVariable(array('id'=>'xtra_item_no','type'=>'INTEGER','title'=>'Additional invoice items','new'=>INVOICE_XTRA_ITEMS));
+        $this->addVariable(array('id'=>'invoice_time_sheets','type'=>'BOOLEAN','title'=>'Invoice time sheets','new'=>INVOICE_TIME_SHEETS));
         $this->addVariable(array('id'=>'invoice_no','type'=>'STRING','title'=>'Invoice No.'));
         $this->addVariable(array('id'=>'invoice_for','type'=>'STRING','title'=>'Invoice For'));
         $this->addVariable(array('id'=>'invoice_comment','type'=>'TEXT','title'=>'Invoice Comment','required'=>false));
@@ -55,6 +57,18 @@ class InvoiceWizard extends Wizard
             $client_id = $this->form['client_id'];
             $from = $this->form['from_date'];
             $to = $this->form['to_date'];
+            $xtra_item_no = $this->form['xtra_item_no'];
+
+            //NB: BOOLEAN/checkbox variable, can set to false or empty string but any other text will be interpreted as checked
+            if($this->form_input) {
+                if(isset($_POST['invoice_time_sheets']) and $_POST['invoice_time_sheets'] === 'YES') {
+                    $this->form['invoice_time_sheets'] = 'YES';
+                    $this->form['show_time'] = true;
+                } else {
+                    $this->form['invoice_time_sheets'] = false;
+                    $this->form['show_time'] = false;
+                }    
+            }            
             
             $sql = 'SELECT `client_id`,`name`,`email`,`email_alt`,`status`,`invoice_no`,`invoice_prefix`,`contact_name` '.
                    'FROM `'.TABLE_PREFIX.'client` WHERE `client_id` = "'.$this->db->escapeSql($client_id).'"';
@@ -89,21 +103,25 @@ class InvoiceWizard extends Wizard
                    'JOIN `'.TABLE_PREFIX.'user_extend` AS UE ON(W.`user_id` = UE.`user_id` AND UE.`parameter` = "HOURLY_RATE") '.
                    'JOIN `'.TABLE_PREFIX.'time_type` AS T ON (W.`type_id` = T.`type_id` AND T.`status` = "OK") '.
                    $sql_where.' GROUP BY W.`user_id` ';
-            $this->data['sql_time_sum']=$sql;     
-            $result = $this->db->readSql($sql);
-            if($result !== 0) {
-              while($row = mysqli_fetch_array($result,MYSQLI_ASSOC)) {
-                if($row['hours'] != 0) {
-                  $item_no++;
-                  
-                  $items[0][$item_no] = $row['hours'];
-                  $items[1][$item_no] = 'Programming hours by '.$row['name'].' @ R'.$row['hour_rate'].'/h';
-                  $items[2][$item_no] = $row['hour_rate'];
-                  $items[3][$item_no] = $row['total_fee'];
-                  $item_total += round($row['total_fee'],0);
-                }  
-              }  
-            }  
+            $this->data['sql_time_sum']=$sql;  
+
+            if($this->form['invoice_time_sheets']) {
+                $result = $this->db->readSql($sql);
+                if($result !== 0) {
+                  while($row = mysqli_fetch_array($result,MYSQLI_ASSOC)) {
+                    if($row['hours'] != 0) {
+                      $item_no++;
+                      
+                      $items[0][$item_no] = $row['hours'];
+                      $items[1][$item_no] = 'Programming hours by '.$row['name'].' @ R'.$row['hour_rate'].'/h';
+                      $items[2][$item_no] = $row['hour_rate'];
+                      $items[3][$item_no] = $row['total_fee'];
+                      $item_total += round($row['total_fee'],0);
+                    }  
+                  }  
+                } 
+            }
+             
             
             //get any fixed repeat items
             $sql = 'SELECT `fixed_id`,`name`,`quantity`,`price`,`repeat_period`,`repeat_date` FROM `'.TABLE_PREFIX.'invoice_fixed` '.
@@ -131,8 +149,8 @@ class InvoiceWizard extends Wizard
               }  
             } 
             
-            //add 5 xtra empty rows to items
-            for($i = 1; $i <= 5; $i++) {
+            //add specified xtra empty rows to items
+            for($i = 1; $i <= $xtra_item_no; $i++) {
               $item_no++;
               $items[0][$item_no] = '';
               $items[1][$item_no] = '';
@@ -183,6 +201,8 @@ class InvoiceWizard extends Wizard
                 if($items[0][$i]==0) $items[0][$i]='';
             }  
           
+            if($item_total == 0) $this->addError('Your item total cannot be zero!');
+
             //check if vat rate valid(if entered)
             if($vat!=0 and $vat>(VAT_RATE*$item_total)) $this->addError('VAT entered is greater than '.(VAT_RATE*100).'% of sub-total!');
           
@@ -228,7 +248,7 @@ class InvoiceWizard extends Wizard
             
             $invoice['show_period'] = $this->form['show_period'];
                   
-            if($this->form['show_time'] === 'YES') {
+            if($this->form['invoice_time_sheets'] === 'YES' and $this->form['show_time'] === 'YES') {
                 $invoice['time'] = true;
                 $invoice['time_sum'] = true;
                 $invoice['sql_time'] = $this->data['sql_time'];;

@@ -66,7 +66,7 @@ $html .= $html_items.'<br/><br/>'.
 $html .= '<p>'.Form::checkBox('show_period','YES',$form['show_period']).'Include time period in invoice header?</p>';
 
 //show time sheet data if any       
-if($result['time'] !== 0) {
+if($form['invoice_time_sheets'] === 'YES' and $result['time'] !== 0) {
   $html .= '<p>'.Form::checkBox('show_time','YES',$form['show_time']).'Include time schedule in invoice?</p>'.
            //'<input type="checkbox" name="show_time" value="YES" checked>Include time schedule in invoice?<br/>'.
            '<div>'.Html::mysqlDumpHtml($result['time_sum']).'</div>'.

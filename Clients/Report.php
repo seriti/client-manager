@@ -4,6 +4,8 @@ namespace App\Clients;
 use Seriti\Tools\Form;
 use Seriti\Tools\Report AS ReportTool;
 
+use App\Clients\HelpersReport;
+
 class Report extends ReportTool
 {
      
@@ -14,17 +16,18 @@ class Report extends ReportTool
         //$this->report_header = '';
         $this->always_list_reports = true;
 
-        $param = ['input'=>['select_client','select_dates']];
+        $param = ['input'=>['select_client','select_dates','select_format']];
         $this->addReport('CLIENT_TIME','Client time sheets',$param); 
         $this->addReport('CLIENT_STATEMENT','Client statement simple',$param); 
         $this->addReport('CLIENT_STATEMENT_LEDGER','Client statement ledger',$param); 
 
-        $param = ['input'=>['select_task']];
+        $param = ['input'=>['select_task','select_format']];
         $this->addReport('TASK_SUMMARY','Client Task summary',$param); 
  
         $this->addInput('select_client','Select client');
         $this->addInput('select_dates','Select date range');
         $this->addInput('select_task','Select task');
+        $this->addInput('select_format','');
     }
 
     protected function viewInput($id,$form = []) 
@@ -78,6 +81,13 @@ class Report extends ReportTool
                      </table>';
         } 
 
+        if($id === 'select_format') {
+            if(isset($form['format'])) $format = $form['format']; else $format = 'HTML';
+            $html .= Form::radiobutton('format','PDF',$format).'&nbsp;<img src="/images/pdf_icon.gif">&nbsp;PDF document<br/>';
+            $html .= Form::radiobutton('format','CSV',$format).'&nbsp;<img src="/images/excel_icon.gif">&nbsp;CSV/Excel document<br/>';
+            $html .= Form::radiobutton('format','HTML',$format).'&nbsp;Show on page<br/>';
+        }
+
         return $html;       
     }
 
@@ -85,8 +95,12 @@ class Report extends ReportTool
     {
         $html = '';
         $error = '';
+        
+        $options = [];
+        $options['format'] = $form['format'];
+
         if($id === 'CLIENT_TIME') {
-            $html .= Helpers::timeSheets($this->db,$this->container,$form['client_id'],$form['from_date'],$form['to_date'],$error); 
+            $html .= HelpersReport::timeSheets($this->db,$this->container,$form['client_id'],$form['from_date'],$form['to_date'],$options,$error); 
             if($error !== '') $this->addError($error);
         }
 
@@ -94,7 +108,7 @@ class Report extends ReportTool
             if($form['client_id'] === 'ALL') {
                 $this->addError('Statement only valid for a single client!');
             } else {
-                $html .= Helpers::statement($this->db,$this->container,$form['client_id'],$form['from_date'],$form['to_date'],$error); 
+                $html .= HelpersReport::statement($this->db,$this->container,$form['client_id'],$form['from_date'],$form['to_date'],$options,$error); 
                 if($error !== '') $this->addError($error);
             }    
         }
@@ -103,7 +117,7 @@ class Report extends ReportTool
             if($form['client_id'] === 'ALL') {
                 $this->addError('Statement only valid for a single client!');
             } else {
-                $html .= Helpers::statementLedger($this->db,$this->container,$form['client_id'],$form['from_date'],$form['to_date'],$error); 
+                $html .= HelpersReport::statementLedger($this->db,$this->container,$form['client_id'],$form['from_date'],$form['to_date'],$options,$error); 
                 if($error !== '') $this->addError($error);
             }    
         }
@@ -111,7 +125,7 @@ class Report extends ReportTool
         if($id === 'TASK_SUMMARY') {
             $options = [];
             $options['format'] = 'HTML';
-            $html .= Helpers::taskReport($this->db,$this->container,$form['task_id'],$options,$error); 
+            $html .= HelpersReport::taskReport($this->db,$this->container,$form['task_id'],$options,$error); 
             if($error !== '') $this->addError($error);
         }
 
