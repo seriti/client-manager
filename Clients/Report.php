@@ -21,7 +21,7 @@ class Report extends ReportTool
         $this->addReport('CLIENT_STATEMENT','Client statement simple',$param); 
         $this->addReport('CLIENT_STATEMENT_LEDGER','Client statement ledger',$param); 
 
-        $param = ['input'=>['select_task','select_format']];
+        $param = ['input'=>['select_task']];
         $this->addReport('TASK_SUMMARY','Client Task summary',$param); 
  
         $this->addInput('select_client','Select client');

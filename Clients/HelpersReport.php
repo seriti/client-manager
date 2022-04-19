@@ -24,19 +24,26 @@ use Psr\Container\ContainerInterface;
 class HelpersReport {
     
     //time sheets report
-    public static function timeSheets($db,$container,$client_id,$from_date,$to_date,$options = [],&$error) {
+    public static function timeSheets($db,ContainerInterface $container,$client_id,$from_date,$to_date,$options = [],&$error) {
         $error = '';
         $html = '';
         $invoice_total = 0.00;
         $payment_total = 0.00;
         $balance = 0.00;
 
+        
         if(!isset($options['format'])) $options['format'] = 'HTML';
+        if(!isset($options['footer'])) $options['footer'] = true;
+        
         //if($options['format'] === 'CSV') $error .= 'CSV format not supported';
 
         if($error !== '') return false;  
-    
 
+        if($options['format'] === 'PDF' and $options['footer']) {
+            $footer = $container->system->getDefault('INVOICE_FOOTER','');    
+        }
+        
+    
         $cache = $container['cache'];
         $cache->setCache('CSV');
         
@@ -82,7 +89,7 @@ class HelpersReport {
             
         }  
         
-        if($error == '') {
+        if($error === '') {
             $html_options = [];
             $pdf_options = [];
 
@@ -121,7 +128,7 @@ class HelpersReport {
                 $align = 'L';
 
                 $pdf_dir = BASE_UPLOAD.UPLOAD_TEMP;
-                $pdf_name = $doc_base_name.'.pdf';
+                $pdf_name = $doc_name_base.'.pdf';
                 $pdf_name = str_replace(' ','_',$pdf_name);
                                 
                 $pdf = new Pdf('Portrait','mm','A4');
@@ -156,7 +163,14 @@ class HelpersReport {
                 $col_w = [20,30,30,30,20,20,40];
                 $col_type = ['','','','DATE','','',''];
                 $pdf->mysqlDrawTable($result['time'],$row_h,$col_w,$col_type,$align,$pdf_options);
-                $pdf->Ln($row_h);
+                $pdf->Ln($row_h*2);
+
+                //add invoice footer text, if any.
+                if($footer !== '') {
+                    $pdf->MultiCell(0,$row_h,$footer,0,'L',0);      
+                    $pdf->Ln($row_h);
+                }
+        
                 
                 //finally create pdf file
                 //$file_path=$pdf_dir.$pdf_name;
@@ -188,7 +202,7 @@ class HelpersReport {
     } 
     
     //invoices and payments report
-    public static function statement($db,$container,$client_id,$from_date,$to_date,$options = [],&$error) {
+    public static function statement($db,ContainerInterface $container,$client_id,$from_date,$to_date,$options = [],&$error) {
         $error = '';
         $html = '';
         $invoice_total = 0.00;
@@ -197,7 +211,11 @@ class HelpersReport {
         $balance = 0.00;
 
         if(!isset($options['format'])) $options['format'] = 'HTML';
-        //if($options['format'] === 'CSV') $error .= 'CSV format not supported';
+        if(!isset($options['footer'])) $options['footer'] = true;
+
+        if($options['format'] === 'PDF' and $options['footer']) {
+            $footer = $container->system->getDefault('INVOICE_FOOTER','');    
+        }
 
         $cache = $container['cache'];
         $cache->setCache('CSV');
@@ -388,7 +406,13 @@ class HelpersReport {
                     $pdf->Ln($row_h);
                     $pdf->arrayDumpPdf($credits,$row_h,$col_width,$col_type,'30',$pdf_options);
                     $pdf->Ln($row_h);
-                }    
+                }  
+
+                //add invoice footer text, if any.
+                if($footer !== '') {
+                    $pdf->MultiCell(0,$row_h,$footer,0,'L',0);      
+                    $pdf->Ln($row_h);
+                }  
                 
                 //finally create pdf file
                 //$file_path=$pdf_dir.$pdf_name;
@@ -429,7 +453,7 @@ class HelpersReport {
     }
     
     //invoices and payments report
-    public static function statementLedger($db,$container,$client_id,$from_date,$to_date,$options = [],&$error) {
+    public static function statementLedger($db,ContainerInterface $container,$client_id,$from_date,$to_date,$options = [],&$error) {
         $error = '';
         $html = '';
         $invoice_total = 0.00;
@@ -440,7 +464,11 @@ class HelpersReport {
         $first_col_key = false;
 
         if(!isset($options['format'])) $options['format'] = 'HTML';
-        //if($options['format'] === 'CSV') $error .= 'CSV format not supported';
+        if(!isset($options['footer'])) $options['footer'] = true;
+
+        if($options['format'] === 'PDF' and $options['footer']) {
+            $footer = $container->system->getDefault('INVOICE_FOOTER','');    
+        }
 
         if($error !== '') return false;  
 
@@ -604,6 +632,12 @@ class HelpersReport {
                 $pdf->arrayDumpPdf($entries,$row_h,$col_width,$col_type,'10',$pdf_options);
                 $pdf->Ln($row_h);
 
+                //add invoice footer text, if any.
+                if($footer !== '') {
+                    $pdf->MultiCell(0,$row_h,$footer,0,'L',0);      
+                    $pdf->Ln($row_h);
+                }
+
                 //finally create pdf file
                 //$file_path=$pdf_dir.$pdf_name;
                 //$pdf->Output($file_path,'F');   
@@ -627,7 +661,7 @@ class HelpersReport {
         return $html; 
     } 
     
-    public static function sendTaskReport($db,$container,$task_id,$mail_to,&$error) {
+    public static function sendTaskReport($db,ContainerInterface $container,$task_id,$mail_to,&$error) {
         $error = '';
         $error_tmp = '';
         
@@ -665,7 +699,7 @@ class HelpersReport {
         }    
     }  
     
-    public static function taskReport($db,$container,$task_id,$options = [],&$error) {
+    public static function taskReport($db,ContainerInterface $container,$task_id,$options = [],&$error) {
         $error = '';
         $error_tmp = '';
         $output = '';
