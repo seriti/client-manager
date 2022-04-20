@@ -17,7 +17,7 @@ $to = $form['to_date'];
 //identify client and invoice dates
 $html .= '<h1>'.$client['name'].'</h1>';
 
-if($form['show_period'] === 'YES') {
+if($form['show_period']) {
   $html .= '<h1>For period: from '.$from.' to '.$to.'</h1>'; 
 }  
   
@@ -31,7 +31,7 @@ $html .= '<table>'.
 $item_no = count($items[0])-1; //first line contains headers for pdf
 $html .= '<table class="table"><tr><th>Quantity</th><th width="300">Description</th><th>Unit price</th><th>Total</th></tr>';
 for($i = 1; $i <= $item_no; $i++) {
-  if($items[0][$i] != 0) {
+  if($items[0][$i] !== '') {
     $html .= '<tr><td>'.$items[0][$i].'</td>'.
              '<td>'.$items[1][$i].'</td>'.
              '<td>'.number_format($items[2][$i],2).'</td>'.
@@ -48,8 +48,8 @@ $html .= '<tr><td colspan="2"></td><td>Subtotal</td><td><strong>'.number_format(
         
 $html  .= '</table>';
 
-if($form['invoice_time_sheets'] === 'YES') {
-    if($form['show_time'] === 'YES') {
+if($form['invoice_time_sheets']) {
+    if($form['show_time']) {
       $html .= 'Time sheets will be attached to invoice document.<br/>';
     } else {
       $html .= 'Time sheets will NOT be attached to invoice document.<br/>';       
@@ -57,7 +57,7 @@ if($form['invoice_time_sheets'] === 'YES') {
 }
 
 
-if($form['show_period'] === 'YES') {
+if($form['show_period']) {
   $html .= 'Time period header will be included in invoice document.<br/>';
 } else {
   $html .=' Time period header will NOT be included in invoice document.<br/>';

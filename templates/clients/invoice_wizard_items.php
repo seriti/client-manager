@@ -46,7 +46,7 @@ for($i = 1; $i <= $item_no; $i++) {
                '<td>'.Form::textInput('price_'.$i,$items[2][$i],$param).'</td>'.
                '<td>'.Form::textInput('total_'.$i,$items[3][$i],$param).'</td>'.
                '</tr>';
-  $item_total += $items[3][$i]; 
+  $item_total += (float)$items[3][$i]; 
 }  
  
 
@@ -63,11 +63,11 @@ $html .= $html_items.'<br/><br/>'.
          '<input type="submit" value="Check totals and xtra items before processing" class="btn btn-primary"><br/>'.
          '</div>';
        
-$html .= '<p>'.Form::checkBox('show_period','YES',$form['show_period']).'Include time period in invoice header?</p>';
+$html .= '<p>'.Form::checkBox('show_period',true,$form['show_period']).'Include time period in invoice header?</p>';
 
 //show time sheet data if any       
-if($form['invoice_time_sheets'] === 'YES' and $result['time'] !== 0) {
-  $html .= '<p>'.Form::checkBox('show_time','YES',$form['show_time']).'Include time schedule in invoice?</p>'.
+if($form['invoice_time_sheets'] and $result['time'] !== 0) {
+  $html .= '<p>'.Form::checkBox('show_time',true,$form['show_time']).'Include time schedule in invoice?</p>'.
            //'<input type="checkbox" name="show_time" value="YES" checked>Include time schedule in invoice?<br/>'.
            '<div>'.Html::mysqlDumpHtml($result['time_sum']).'</div>'.
            '<div>'.Html::mysqlDumpHtml($result['time']).'</div>';

@@ -36,7 +36,7 @@ class Config
         define('TABLE_PREFIX',$module['table_prefix']);
         define('TABLE_PREFIX_GL',$ledger['table_prefix']);
         if(!defined('INVOICE_XTRA_ITEMS')) define('INVOICE_XTRA_ITEMS',5);
-        if(!defined('INVOICE_TIME_SHEETS')) define('INVOICE_TIME_SHEETS','YES'); //make = false to ignore
+        if(!defined('INVOICE_TIME_SHEETS')) define('INVOICE_TIME_SHEETS',true);
         
         define('HOURLY_RATE',610);
         define('VAT_RATE',0.15);

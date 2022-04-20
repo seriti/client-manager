@@ -20,7 +20,7 @@ $sql = 'SELECT `client_id`, `name` FROM `'.TABLE_PREFIX.'client` ORDER BY `name`
 $html .= '<tr><td>For client:</td><td>'.Form::sqlList($sql,$db,'client_id',$form['client_id'],$list_param).'</td><td></td></tr>'.
          '<tr><td>From:</td><td>'.Form::textInput('from_date',$form['from_date'],$date_param).'</td><td></td></tr>'.
          '<tr><td>To:</td><td>'.Form::textInput('to_date',$form['to_date'],$date_param).'</td><td></td></tr>'.
-         '<tr><td>Invoice timesheets: </td><td>'.Form::checkBox('invoice_time_sheets','YES',$form['invoice_time_sheets']).' '.
+         '<tr><td>Invoice timesheets: </td><td>'.Form::checkBox('invoice_time_sheets',true,$form['invoice_time_sheets']).' '.
                  '</td><td>Include client timesheets in invoice?</td></tr>'.
          '<tr><td>Xtra invoice items: </td><td>'.Form::textInput('xtra_item_no',$form['xtra_item_no'],$input_param_small).' '.
                  '</td><td><i>(Indicates number of additional invoice items you can manually specify)</i></td></tr>'.

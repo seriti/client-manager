@@ -100,18 +100,20 @@ class CreditWizard extends Wizard
             $item_total = 0.00;
             //process standard items like timesheets and fixed repeats
             for($i=1; $i<=$item_no; $i++) {  
-                //Validate::integer('Quantity',0,10000,$_POST['quant_'.$i],$error);
+                
                 $items[0][$i] = Secure::clean('float',$_POST['quant_'.$i]);
                 $items[1][$i] = Secure::clean('string',$_POST['desc_'.$i]);
                 $items[2][$i] = Secure::clean('float',$_POST['price_'.$i]);
                 $items[3][$i] = Secure::clean('float',$_POST['total_'.$i]);
-                $item_total += $items[3][$i];
+                $item_total += (float)$items[3][$i];
                 
-                if(round($items[0][$i]*$items[2][$i],2)!=round($items[3][$i],2)) {
+                if(round( (float)$items[0][$i] * (float)$items[2][$i] ,2) != round((float)$items[3][$i],2)) {
                     $this->addError('Credit item in Row['.$i.'] invalid total!');
                 }  
                 if($items[0][$i] == 0) $items[0][$i] = '';
             }  
+
+            if($item_total == 0) $this->addError('Your item total cannot be zero!');
           
             //check if vat rate valid(if entered)
             if($vat != 0 and $vat > (VAT_RATE*$item_total)) $this->addError('VAT entered is greater than '.(VAT_RATE*100).'% of sub-total!');
@@ -133,7 +135,7 @@ class CreditWizard extends Wizard
             //get rid of empty rows in item array
             $item_no = count($items[0])-1; //first line contains headers
             for($i = 1; $i <= $item_no; $i++) {
-                if($items[0][$i] == 0) {
+                if($items[0][$i] == '') {
                     unset($items[0][$i]);
                     unset($items[1][$i]);
                     unset($items[2][$i]);
