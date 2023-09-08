@@ -14,6 +14,7 @@ class SetupData extends SetupModuledata
                             'CREATE TABLE `TABLE_NAME` (
                                 `client_id` int(11) NOT NULL AUTO_INCREMENT,
                                 `name` varchar(64) NOT NULL,
+                                `description` text NOT NULL,
                                 `email` varchar(64) NOT NULL,
                                 `status` varchar(16) NOT NULL,
                                 `invoice_no` int(11) NOT NULL,
@@ -192,8 +193,7 @@ class SetupData extends SetupModuledata
         $this->addUpdateSql('2019-01-16 00:03','INSERT INTO `TABLE_PREFIXtask` (`name`,`description`,`status`,`date_create`,`client_id`) VALUES("wtf","wtf desc","OK","2018-12-12",63)');
         $this->addUpdateSql('2019-01-16 00:04','DELETE FROM `TABLE_PREFIXtask` WHERE `name` = "wtf"','REMOVE "wtf" tasks');
         $this->addUpdateSql('2022-03-22 12:00','ALTER TABLE `TABLE_PREFIXclient` ADD COLUMN `credit_no` INT NOT NULL AFTER `invoice_no`');
-
-        
+        $this->addUpdateSql('2022-07-01 12:00','ALTER TABLE `TABLE_PREFIXclient` ADD COLUMN `description` TEXT NOT NULL AFTER `name`');
 
     }
     

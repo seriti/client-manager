@@ -61,9 +61,17 @@ class Helpers {
         $pdf->Cell(30,$row_h,'INVOICE :',0,0,'R',0);
         $pdf->Cell(30,$row_h,$data['no'],0,0,'L',0);
         $pdf->Ln($row_h);
+        
         $pdf->Cell(30,$row_h,'To :',0,0,'R',0);
         $pdf->Cell(30,$row_h,$data['for'],0,0,'L',0);
         $pdf->Ln($row_h);
+        if($client['description'] !== '') {
+            $pdf->Cell(30);
+            $pdf->MultiCell(0,$row_h,$client['description'],0,'L',0);  
+            $pdf->Ln($row_h);    
+        }
+        
+
         $pdf->Cell(30,$row_h,'Date issued :',0,0,'R',0);
         $pdf->Cell(30,$row_h,date('j-F-Y'),0,0,'L',0);
         $pdf->Ln($row_h);
@@ -87,14 +95,14 @@ class Helpers {
         
         //totals
         $pdf->changeFont('H3');
-        $pdf->Cell(142,$row_h,'SUBTOTAL :',0,0,'R',0);
-        $pdf->Cell(142,$row_h,number_format($data['subtotal'],2),0,0,'L',0);
+        $pdf->Cell(140,$row_h,'SUBTOTAL :',0,0,'R',0);
+        $pdf->Cell(20,$row_h,number_format($data['subtotal'],2),0,0,'R',0);
         $pdf->Ln($row_h);
-        $pdf->Cell(142,$row_h,'VAT :',0,0,'R',0);
-        $pdf->Cell(142,$row_h,$data['vat'],0,0,'L',0);
+        $pdf->Cell(140,$row_h,'VAT :',0,0,'R',0);
+        $pdf->Cell(20,$row_h,$data['vat'],0,0,'R',0);
         $pdf->Ln($row_h);
-        $pdf->Cell(142,$row_h,'TOTAL :',0,0,'R',0);
-        $pdf->Cell(142,$row_h,number_format($data['total'],2),0,0,'L',0);
+        $pdf->Cell(140,$row_h,'TOTAL :',0,0,'R',0);
+        $pdf->Cell(20,$row_h,number_format($data['total'],2),0,0,'R',0);
         $pdf->Ln($row_h);
         $pdf->Ln($row_h);
             

@@ -234,7 +234,7 @@ class HelpersReport {
             $invoices = $db->readSqlArray($sql); 
             if($invoices == 0) $error .= 'NO invoices found over period from['.$from_date.'] to ['.$to_date.'] ';
             
-            $sql = 'SELECT `payment_id`,`date`,`amount`,`description` FROM `'.TABLE_PREFIX.'payment` '.
+            $sql = 'SELECT `payment_id`,`date`,`description`,`amount` FROM `'.TABLE_PREFIX.'payment` '.
                    'WHERE `client_id` = "'.$db->escapeSql($client_id).'" AND '.
                          '`date` >= "'.$db->escapeSql($from_date).'" AND '.
                          '`date` <= "'.$db->escapeSql($to_date).'" '.
@@ -396,6 +396,8 @@ class HelpersReport {
                     $pdf->SetX(30);
                     $pdf->Cell(70,$row_h,'Payments received over period:',0,0,'L',0);
                     $pdf->Ln($row_h);
+                    $col_width = [30,60,30];
+                    $col_type = ['DATE','','CASH2'];
                     $pdf->arrayDumpPdf($payments,$row_h,$col_width,$col_type,'30',$pdf_options);
                     $pdf->Ln($row_h);
                 } 
@@ -404,6 +406,8 @@ class HelpersReport {
                     $pdf->SetX(30);
                     $pdf->Cell(70,$row_h,'Credit Notes issued over period:',0,0,'L',0);
                     $pdf->Ln($row_h);
+                    $col_width = [30,30,30];
+                    $col_type = ['DATE','CASH2',''];
                     $pdf->arrayDumpPdf($credits,$row_h,$col_width,$col_type,'30',$pdf_options);
                     $pdf->Ln($row_h);
                 }  
@@ -488,7 +492,7 @@ class HelpersReport {
             
             $sql .= ' UNION ALL ';
             
-            $sql .= '(SELECT "PAYMENT",`description` AS `text`,`date`,`amount` FROM `'.TABLE_PREFIX.'payment` '.
+            $sql .= '(SELECT "PAYMENT" AS `type`,`description` AS `text`,`date`,`amount` FROM `'.TABLE_PREFIX.'payment` '.
                      'WHERE `client_id` = "'.$db->escapeSql($client_id).'" AND '.
                            '`date` >= "'.$db->escapeSql($from_date).'" AND '.
                            '`date` <= "'.$db->escapeSql($to_date).'" )';

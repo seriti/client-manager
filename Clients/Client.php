@@ -14,6 +14,7 @@ class Client extends Table
 
         $this->addTableCol(array('id'=>'client_id','type'=>'INTEGER','title'=>'Client ID','key'=>true,'key_auto'=>true,'list'=>false));
         $this->addTableCol(array('id'=>'name','type'=>'STRING','title'=>'Client name'));
+        $this->addTableCol(array('id'=>'description','type'=>'TEXT','title'=>'Client detail','required'=>false,'hint'=>'This will appear on invoice beneath name if specified'));
         $this->addTableCol(array('id'=>'contact_name','type'=>'STRING','title'=>'Contact person'));
         $this->addTableCol(array('id'=>'email','type'=>'EMAIL','title'=>'Email primary'));
         $this->addTableCol(array('id'=>'email_alt','type'=>'EMAIL','title'=>'Email alternative','required'=>false));
@@ -30,7 +31,7 @@ class Client extends Table
         $this->addAction(array('type'=>'popup','text'=>'invoices','url'=>'client_fixed','mode'=>'view','width'=>600,'height'=>600)); 
         $this->addAction(array('type'=>'popup','text'=>'payments','url'=>'client_payment','mode'=>'view','width'=>600,'height'=>600)); 
 
-        $this->addSearch(array('name','contact_name','email','invoice_prefix','status'),array('rows'=>2));
+        $this->addSearch(array('name','description','contact_name','email','invoice_prefix','status'),array('rows'=>2));
 
         $this->addSelect('status','(SELECT "ACTIVE") UNION (SELECT "INACTIVE")');
     }
