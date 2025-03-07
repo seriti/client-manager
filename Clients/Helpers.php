@@ -75,7 +75,7 @@ class Helpers {
         $pdf->Cell(30,$row_h,'Date issued :',0,0,'R',0);
         $pdf->Cell(30,$row_h,date('j-F-Y'),0,0,'L',0);
         $pdf->Ln($row_h);
-        if($data['show_period'] === 'YES') {
+        if($data['show_period']) {
             $pdf->Cell(30,$row_h,'For period :',0,0,'R',0);
             $pdf->Cell(30,$row_h,'['.$data['date_from'].' to '.$data['date_to'].']',0,0,'L',0);
             $pdf->Ln($row_h);

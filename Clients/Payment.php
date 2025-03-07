@@ -26,6 +26,8 @@ class Payment extends Table
 
         $this->addSearch(array('client_id','date','amount','description','transact_id'),array('rows'=>2));
 
+        $this->addSearchAggregate(['sql'=>'SUM(T.amount)','title'=>'Total Amount']);
+
         $this->addSelect('client_id','SELECT `client_id`,`name` FROM `'.TABLE_PREFIX.'client` ORDER BY `name`');
     }    
 }

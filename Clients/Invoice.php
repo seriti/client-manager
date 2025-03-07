@@ -42,6 +42,8 @@ class Invoice extends Table
 
         $this->addSearch(array('client_id','invoice_no','date','total','comment','status'),array('rows'=>2));
 
+        $this->addSearchAggregate(['sql'=>'SUM(T.amount)','title'=>'Total Amount']);
+
         $this->addSelect('client_id','SELECT `client_id`,`name` FROM `'.TABLE_PREFIX.'client` ORDER BY `name`');
         $this->addSelect('status','(SELECT "OK") UNION (SELECT "PAID") UNION (SELECT "BAD_DEBT")');
 
